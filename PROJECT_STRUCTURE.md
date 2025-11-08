@@ -75,8 +75,8 @@ flight-pathfinder/
    - Track algorithm performance metrics
 
 5. **A* Algorithm** (`algorithms/a_star.py`)
-   - Implement A* with geographic heuristics
-   - Support multiple heuristic functions (Euclidean, Haversine, Manhattan)
+   - Implement A* with geographic heuristics ✅
+   - Support multiple heuristic functions (Euclidean, Haversine, Manhattan) ✅
    - Ensure heuristic admissibility
    - Compare performance with Dijkstra
 

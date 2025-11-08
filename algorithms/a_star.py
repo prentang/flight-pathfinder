@@ -117,18 +117,17 @@ class AStarPathFinder:
             neighbors = self.network.get_neighbors(current)
 
             for neighbor_code, edge_weight in neighbors:
-                if neighbor_code in closed_set:
-                    continue
                 
                 # Calculate tentative g_score through current
                 tentative_g_score = g_score[current] + edge_weight
 
                 # If neighbor not in open_set or new g_score is better:
-                if neighbor_code not in g_score or tentative_g_score < g_score[neighbor_code]:
+                if tentative_g_score < g_score.get(neighbor_code, float("inf")):
                     # Update came_from, g_score, f_score
                     came_from[neighbor_code] = current
                     g_score[neighbor_code] = tentative_g_score
-                    f = self._heuristic(neighbor_code, destination, heuristic)
+                    h = self._heuristic(neighbor_code, destination, heuristic)
+                    f = tentative_g_score + h
                     f_score[neighbor_code] = tentative_g_score + f
 
                     # Add neighbor to open_set
@@ -246,11 +245,18 @@ class AStarPathFinder:
         # TODO: Ensure admissibility for flight paths
 
         lat_diff = abs(lat2 - lat1) * 111.0
+
+        lon_diff_raw = abs(lon2 - lon1)
+
+        #  Handle date line wraparound: take shorter path
+        if lon_diff_raw > 180.0:
+            lon_diff_raw = 360.0 - lon_diff_raw
         
-        # Average latitude for longitude calculation
+        
         avg_lat = (lat1 + lat2) / 2
-        lon_diff = abs(lon2 - lon1) * 111.0 * math.cos(math.radians(avg_lat))
         
+        lon_diff = lon_diff_raw * 111.0 * math.cos(math.radians(avg_lat))
+
         # Manhattan distance
         distance = lat_diff + lon_diff
         

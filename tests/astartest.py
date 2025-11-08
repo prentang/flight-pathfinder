@@ -104,16 +104,10 @@ class TestAStarPathFinder(unittest.TestCase):
         """Load airports from CSV and create a test flight network."""
         network = FlightNetwork()
         
-        # Try multiple paths to find airports.csv
+        # Try multiple paths to find airports.dat
         possible_paths = [
-            "airports.csv",
-            "../airports.csv",
-            "../../airports.csv",
-            "../data/airports.csv",
-            "data/airports.csv",
-            os.path.join(os.path.dirname(__file__), "airports.csv"),
-            os.path.join(os.path.dirname(__file__), "..", "airports.csv"),
-            os.path.join(os.path.dirname(__file__), "..", "data", "airports.csv"),
+            "data/openflights/airports.dat",
+            os.path.join(os.path.dirname(__file__), "..", "data", "openflights", "airports.dat"),
         ]
         
         airports_file = None
@@ -126,11 +120,11 @@ class TestAStarPathFinder(unittest.TestCase):
             current_dir = os.getcwd()
             script_dir = os.path.dirname(os.path.abspath(__file__))
             raise FileNotFoundError(
-                f"Cannot find airports.csv in any expected location.\n"
+                f"Cannot find airports.dat in any expected location.\n"
                 f"Current directory: {current_dir}\n"
                 f"Script directory: {script_dir}\n"
                 f"Tried paths: {', '.join(possible_paths)}\n"
-                f"Please place airports.csv in one of these locations."
+                f"Please place airports.dat in one of these locations."
             )
         
         with open(airports_file, 'r', encoding='utf-8') as f:
