@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 from algorithms.a_star import AStarPathFinder
 from algorithms.dijkstra import DijkstraPathFinder
 from models.graph import FlightNetwork, Airport, Route
-
+from data.route_loader import calculate_distance
 
 class TestAStarPathFinder(unittest.TestCase):
     """Test cases for A* algorithm implementation."""
@@ -17,7 +17,7 @@ class TestAStarPathFinder(unittest.TestCase):
         # TODO: Add sample airports with known coordinates
         # TODO: Add sample routes with known distances
         # TODO: Initialize AStarPathFinder with test network
-        pass
+        
     
     def test_heuristic_functions(self):
         """Test different heuristic function implementations."""
