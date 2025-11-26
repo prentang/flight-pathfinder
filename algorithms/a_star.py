@@ -128,7 +128,7 @@ class AStarPathFinder:
                     g_score[neighbor_code] = tentative_g_score
                     h = self._heuristic(neighbor_code, destination, heuristic)
                     f = tentative_g_score + h
-                    f_score[neighbor_code] = tentative_g_score + f
+                    f_score[neighbor_code] = f
 
                     # Add neighbor to open_set
                     self.last_run_stats["nodes_generated"] += 1
@@ -278,7 +278,10 @@ class AStarPathFinder:
         # TODO: Verify both algorithms find same optimal path
         # TODO: Calculate performance improvement of A*
         # TODO: Return comparison statistics
-        pass
+        from algorithms.dijkstra import DijkstraPathFinder
+
+        
+        
     
     def get_algorithm_stats(self) -> Dict[str, any]:
         """
@@ -293,5 +296,5 @@ class AStarPathFinder:
         # TODO: - Execution time compared to uninformed search
         # TODO: - Memory usage
         # TODO: - Path optimality verification
-        pass
+        return self.last_run_stats.copy()
 
