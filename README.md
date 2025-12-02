@@ -1,6 +1,6 @@
-# ✈️ Flight Path Optimizer — Dijkstra & A* Algorithm
+#  Flight Path Optimizer — Dijkstra & A* Algorithm
 
-## 📍 Overview
+## Overview
 This project models the U.S. air travel network as a **graph**, where:
 - **Airports** are nodes
 - **Routes** are edges
@@ -15,7 +15,7 @@ The goal is to:
 
 ---
 
-## 🧠 Features
+## Features
 - Graph-based modeling of U.S. airports and routes  
 - Dijkstra’s and A\* algorithms implemented from scratch  
 - Real dataset integration via CSV/JSON (OpenFlights) or REST API (OpenSky)  
@@ -24,7 +24,7 @@ The goal is to:
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 | Category | Tools / Libraries |
 |-----------|------------------|
 | Language | Python 3.10+ |
@@ -36,9 +36,23 @@ The goal is to:
 
 ---
 
-## 🚀 Setup Instructions
+## Setup/Testing Instructions
 
 ### 1️⃣ Clone the repository
 ```bash
 git clone https://github.com/<your-username>/flight-path-optimizer.git
 cd flight-path-optimizer
+```
+
+### 2️⃣ Set up a virtual environment (recommended)
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3️⃣ Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+This ensures users handle externally managed environments (e.g., on macOS) and avoid conflicts. Deactivate the virtual environment when done with `deactivate`.
