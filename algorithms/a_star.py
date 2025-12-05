@@ -21,11 +21,8 @@ class AStarPathFinder:
         Args:
             network: FlightNetwork graph to search
         """
-        # TODO: Store reference to flight network
-        # TODO: Initialize heuristic caching
         self.network = network
         self.heuristic_cache = {}
-
         self.last_run_stats = {}
         
         
@@ -53,55 +50,27 @@ class AStarPathFinder:
             "heuristic_calls": 0,
         }
 
-        # TODO: Validate source and destination airports exist
         if source not in self.network.airports:
             raise ValueError(f"Source airport {source} not found in network")
         if destination not in self.network.airports:
             raise ValueError(f"Destination airport {destination} not found in network")
 
-        # TODO: Handle case where source == destination
         if source == destination:
             return ([source], 0.0)
 
-        # TODO: Initialize g_score (actual distance from start)
         g_score = {source: 0.0}
-
-        # TODO: Initialize f_score (g_score + heuristic)
         h_score = {source: self._heuristic(source, destination, heuristic)}
         f_score = {source: h_score[source]}
-
-        # TODO: Initialize open_set (priority queue) with source
         counter = 0
         open_set = [(f_score[source], counter, source)]
-
-        # TODO: Initialize came_from dictionary for path reconstruction
-
         came_from = {}
-        
-        # TODO: Initialize closed_set for visited nodes
         closed_set = set()
 
-
-        # TODO: Main A* algorithm loop:
-        # TODO: - While open_set is not empty:
-        # TODO: - Pop node with lowest f_score
-        # TODO: - If destination reached, reconstruct and return path
-        # TODO: - Add current to closed_set
-        # TODO: - For each neighbor:
-        # TODO:   - Skip if in closed_set
-        # TODO:   - Calculate tentative g_score
-        # TODO:   - If neighbor not in open_set or new g_score is better:
-        # TODO:     - Update came_from, g_score, f_score
-        # TODO:     - Add neighbor to open_set
-        
-        # TODO: Return empty path if no solution found
         while open_set:
-            # Pop node with lowest f_score
-            current_h, _, current = heapq.heappop(open_set) # (current_node_f_score, counter, current_node)
+            current_h, _, current = heapq.heappop(open_set)
             if current in closed_set:
                 continue
 
-            # If destination reached, reconstruct and return path
             if current == destination:
                 path = self._reconstruct_path(came_from, current)
                 self.last_run_stats["path_cost"] = g_score[current]
@@ -109,33 +78,23 @@ class AStarPathFinder:
 
                 return (path, g_score[current])
             
-            # Add current to closed_set
             closed_set.add(current)
             self.last_run_stats["nodes_expanded"] += 1
-
-            # Get each neighbor of current
             neighbors = self.network.get_neighbors(current)
 
             for neighbor_code, edge_weight in neighbors:
-                
-                # Calculate tentative g_score through current
                 tentative_g_score = g_score[current] + edge_weight
 
-                # If neighbor not in open_set or new g_score is better:
                 if tentative_g_score < g_score.get(neighbor_code, float("inf")):
-                    # Update came_from, g_score, f_score
                     came_from[neighbor_code] = current
                     g_score[neighbor_code] = tentative_g_score
                     h = self._heuristic(neighbor_code, destination, heuristic)
                     f = tentative_g_score + h
                     f_score[neighbor_code] = f
-
-                    # Add neighbor to open_set
                     self.last_run_stats["nodes_generated"] += 1
                     counter += 1
                     heapq.heappush(open_set, (f_score[neighbor_code], counter, neighbor_code))
 
-        # Return empty path if no solution found
         self.last_run_stats["execution_time"] = time.time() - start_time
         return ([], float('inf'))
             
@@ -144,7 +103,7 @@ class AStarPathFinder:
         while current in came_from:
             current = came_from[current]
             path.append(current)
-        return path[::-1] # Reverse path to get source -> destination order
+        return path[::-1]
     
     def _heuristic(self, airport1: str, airport2: str, heuristic_type: str = "euclidean") -> float:
         """
@@ -158,12 +117,6 @@ class AStarPathFinder:
         Returns:
             Heuristic distance estimate
         """
-        # TODO: Get coordinates for both airports
-        # TODO: Implement euclidean distance heuristic
-        # TODO: Implement haversine distance heuristic (great circle)
-        # TODO: Implement manhattan  distance heuristic
-        # TODO: Ensure heuristic is admissible (never overestimates)
-        # TODO: Return heuristic distance
         self.last_run_stats["heuristic_calls"] += 1
 
         # Check if heuristic is in cache
@@ -171,7 +124,6 @@ class AStarPathFinder:
         if cache_key in self.heuristic_cache:
             return self.heuristic_cache[cache_key]
         
-        # Getting coordinates for both airports
         airport1 = self.network.airports[airport1]
         airport2 = self.network.airports[airport2]
 
@@ -187,7 +139,6 @@ class AStarPathFinder:
         else:
             raise ValueError(f"Invalid heuristic type: {heuristic_type}")
     
-        # Cache result
         self.heuristic_cache[cache_key] = distance
 
         return distance
@@ -204,15 +155,10 @@ class AStarPathFinder:
         Returns:
             Euclidean distance
         """
-        # TODO: Calculate straight-line distance using Euclidean formula
-        # TODO: Convert coordinates to appropriate scale/units
-        # TODO: Return distance in same units as edge weights
-
         # Convert coordinates to radians
         lat1_rad, lon1_rad = math.radians(lat1), math.radians(lon1)
         lat2_rad, lon2_rad = math.radians(lat2), math.radians(lon2)
-        
-        R = 6371.0 # Earth's radius in kilometers
+        R = 6371.0
 
         # Calculate x,y,z coordinates
         x1 = R * math.cos(lat1_rad) * math.cos(lon1_rad)
@@ -223,10 +169,8 @@ class AStarPathFinder:
         y2 = R * math.cos(lat2_rad) * math.sin(lon2_rad)
         z2 = R * math.sin(lat2_rad)
 
-        # Calculate Euclidean distance
         distance = math.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)
-
-        return distance # Return distance in kilometers
+        return distance
 
     
     def _manhattan_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -240,24 +184,15 @@ class AStarPathFinder:
         Returns:
             Manhattan distance
         """
-        # TODO: Calculate Manhattan distance |x1-x2| + |y1-y2|
-        # TODO: Convert to appropriate units
-        # TODO: Ensure admissibility for flight paths
-
         lat_diff = abs(lat2 - lat1) * 111.0
-
         lon_diff_raw = abs(lon2 - lon1)
 
-        #  Handle date line wraparound: take shorter path
+        # Handle date line wraparound: take shorter path
         if lon_diff_raw > 180.0:
             lon_diff_raw = 360.0 - lon_diff_raw
         
-        
         avg_lat = (lat1 + lat2) / 2
-        
         lon_diff = lon_diff_raw * 111.0 * math.cos(math.radians(avg_lat))
-
-        # Manhattan distance
         distance = lat_diff + lon_diff
         
         return distance
@@ -273,15 +208,54 @@ class AStarPathFinder:
         Returns:
             Dictionary with comparison metrics
         """
-        # TODO: Run both A* and Dijkstra on same source/destination
-        # TODO: Compare execution time, nodes visited, path length
-        # TODO: Verify both algorithms find same optimal path
-        # TODO: Calculate performance improvement of A*
-        # TODO: Return comparison statistics
         from algorithms.dijkstra import DijkstraPathFinder
-
         
+        dijkstra = DijkstraPathFinder(self.network)
         
+        # Run Dijkstra
+        dijkstra_start = time.time()
+        dijkstra_path, dijkstra_cost = dijkstra.find_shortest_path(source, destination)
+        dijkstra_time = time.time() - dijkstra_start
+        dijkstra_stats = dijkstra.get_algorithm_stats()
+        
+        # Run A* with haversine heuristic
+        astar_start = time.time()
+        astar_path, astar_cost = self.find_shortest_path(source, destination, heuristic="haversine")
+        astar_time = time.time() - astar_start
+        astar_stats = self.get_algorithm_stats()
+        
+        # Compare results
+        paths_optimal = (dijkstra_cost == astar_cost) if (dijkstra_path and astar_path) else True
+        
+        comparison = {
+            'source': source,
+            'destination': destination,
+            'dijkstra': {
+                'path': dijkstra_path,
+                'cost': dijkstra_cost,
+                'execution_time': dijkstra_time,
+                'nodes_expanded': dijkstra_stats.get('nodes_expanded', 0),
+                'path_length': len(dijkstra_path)
+            },
+            'astar': {
+                'path': astar_path,
+                'cost': astar_cost,
+                'execution_time': astar_time,
+                'nodes_expanded': astar_stats.get('nodes_expanded', 0),
+                'heuristic_calls': astar_stats.get('heuristic_calls', 0),
+                'path_length': len(astar_path)
+            },
+            'comparison': {
+                'paths_are_optimal': paths_optimal,
+                'time_speedup': dijkstra_time / astar_time if astar_time > 0 else 0,
+                'nodes_reduction_percent': ((dijkstra_stats.get('nodes_expanded', 0) - astar_stats.get('nodes_expanded', 0)) / 
+                                           dijkstra_stats.get('nodes_expanded', 1) * 100) if dijkstra_stats.get('nodes_expanded', 0) > 0 else 0,
+                'astar_faster': astar_time < dijkstra_time,
+                'astar_fewer_nodes': astar_stats.get('nodes_expanded', 0) < dijkstra_stats.get('nodes_expanded', 0)
+            }
+        }
+        
+        return comparison
     
     def get_algorithm_stats(self) -> Dict[str, any]:
         """
@@ -290,11 +264,5 @@ class AStarPathFinder:
         Returns:
             Dictionary with algorithm performance stats
         """
-        # TODO: Track and return A* performance metrics:
-        # TODO: - Nodes expanded vs nodes generated
-        # TODO: - Heuristic effectiveness (reduction in search space)
-        # TODO: - Execution time compared to uninformed search
-        # TODO: - Memory usage
-        # TODO: - Path optimality verification
         return self.last_run_stats.copy()
 

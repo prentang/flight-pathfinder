@@ -19,8 +19,6 @@ class DijkstraPathFinder:
         Args:
             network: FlightNetwork graph to search
         """
-        # TODO: Store reference to flight network
-        # TODO: Initialize result caching if needed
         self.network = network
         self.last_run_stats = {}
     
@@ -45,84 +43,49 @@ class DijkstraPathFinder:
             "heuristic_calls": 0,
         }
 
-        # TODO: Validate that source and destination airports exist
         if source not in self.network.airports:
             raise ValueError(f"Source airport {source} not found in network")
         if destination not in self.network.airports:
             raise ValueError(f"Destination airport {destination} not found in network")
 
-        # TODO: Handle case where source == destination
         if source == destination:
             return ([source], 0.0)
 
-        # TODO: Initialize distances dictionary with infinity for all airports
         distances = {airport: (float('inf') if airport != source else 0) 
             for airport in self.network.airports}
-        # TODO: Set distance to source as 0
         distances[source] = 0
-        # TODO: Initialize previous_nodes dictionary to track path
         previous_nodes = {}
-
-        # TODO: Initialize priority queue with source airport
         priority_queue = [(0, source)]
-        # TODO: Initialize visited set
         visited = set()
         
-        # TODO: - While priority queue is not empty:
-        # TODO: - Pop airport with minimum distance
-        # TODO: - Skip if already visited
-        # TODO: - Mark as visited  
-        # TODO: - If destination reached, break
-        # TODO: - For each neighbor of current airport:
-        # TODO:   - Calculate new distance through current airport
-        # TODO:   - If new distance is shorter, update distance and previous
-        # TODO:   - Add neighbor to priority queue
-        
-        # TODO: Reconstruct path from destination back to source
-        # TODO: Return empty list and infinity if no path found
-        # TODO: Return (path_list, total_distance)
         while priority_queue:
-            # Pop airport with minimum distance
             current_distance, current_airport = heapq.heappop(priority_queue)
-            # Skip if already visited
             if current_airport in visited:
-                # Mark as visited
                 continue
             visited.add(current_airport)
-            # Increment nodes expanded
             self.last_run_stats["nodes_expanded"] += 1    
 
-            # If destination reached, break
             if current_airport == destination:
                 break
             current_airport_object = self.network.get_airport(current_airport)
             for route in current_airport_object.routes:
-                # Calculate new distance through current airport
                 neighbor = route.destination
                 new_distance = current_distance + route.weight
 
-                # If new distance is shorter, update distance and previous
                 if new_distance < distances[neighbor]:
                     distances[neighbor] = new_distance
                     previous_nodes[neighbor] = current_airport
                     heapq.heappush(priority_queue, (new_distance, neighbor))
-                    # Increment nodes generated
                     self.last_run_stats["nodes_generated"] += 1
 
-        # Reconstruct path from destination back to source
         if destination not in previous_nodes and destination != source:
-            # No path found
             self.last_run_stats["execution_time"] = time.time() - start_time
             return ([], float('inf'))
 
-        # Set path cost
         path = self._reconstruct_path(previous_nodes, destination)
         total_distance = distances[destination]
-
-        # Set execution time
         self.last_run_stats["execution_time"] = time.time() - start_time
         self.last_run_stats["path_cost"] = total_distance
-        # Return path and total distance
         return (path, total_distance)
     
     def find_all_shortest_paths(self, source: str) -> Dict[str, Tuple[List[str], float]]:
@@ -208,15 +171,6 @@ class DijkstraPathFinder:
         Returns:
             List of (path, distance) tuples, sorted by distance
         """
-        # TODO: Implement k-shortest paths algorithm (Yen's algorithm)
-        # TODO: Find shortest path first
-        # TODO: For each additional path:
-        # TODO: - Remove edges from previous paths
-        # TODO: - Find shortest path in modified graph
-        # TODO: - Restore edges and continue
-        # TODO: Sort results by total distance
-        # TODO: Return list of k shortest paths
-
         if source not in self.network.airports:
             raise ValueError(f"Source airport {source} not found in network")
         if destination not in self.network.airports:
@@ -309,10 +263,6 @@ class DijkstraPathFinder:
         Returns:
             List of airports from source to destination
         """
-        # TODO: Start from destination and trace back to source
-        # TODO: Build path list by following previous pointers
-        # TODO: Reverse path to get source -> destination order
-        # TODO: Return path as list of airport codes
         path = []
         current = destination
         while current is not None:
@@ -328,12 +278,6 @@ class DijkstraPathFinder:
         Returns:
             Dictionary with algorithm performance stats
         """
-        # TODO: Track and return algorithm performance metrics:
-        # TODO: - Number of nodes visited
-        # TODO: - Number of edges relaxed  
-        # TODO: - Execution time
-        # TODO: - Memory usage
-        # TODO: - Path optimality verification
         return self.last_run_stats.copy()
 
 
