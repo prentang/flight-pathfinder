@@ -38,26 +38,168 @@ The goal is to:
 
 ## Setup/Testing Instructions
 
-### 1️Clone the repository
+### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/flight-path-optimizer.git
-cd flight-path-optimizer
+git clone https://github.com/prentang/flight-pathfinder.git
+cd flight-pathfinder
 ```
 
-### 2️ Set up a virtual environment (recommended)
+### 2. Set up a virtual environment (REQUIRED)
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3 Install dependencies
+**Important:** This project requires a virtual environment due to macOS externally managed Python. Always activate the virtual environment before running any commands.
+
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-This ensures users handle externally managed environments (e.g., on macOS) and avoid conflicts. Deactivate the virtual environment when done with `deactivate`.
+This installs all required packages including:
+- `pandas` - Data processing
+- `numpy` - Numerical operations
+- `plotly` - Interactive visualizations
+- `networkx` - Graph algorithms
+- `requests` - API integration
+- `pytest` - Testing framework
 
-### 4 Run Unit Tests
+### 4. Run Unit Tests
 ```bash
-pytest tests/ -v
+python -m unittest discover tests -v
+```
+
+**Expected output:** All 48 tests should pass
+```
+Ran 48 tests in 0.XXXs
+OK
+```
+
+---
+
+## Interactive Visualizations
+
+### Run the Visualization Demo
+```bash
+source venv/bin/activate  # Activate virtual environment
+python examples/visualize_test_paths.py
+```
+
+This will open **3 interactive Plotly maps** in your browser:
+
+1. **Single Path Visualization** (LAX → JFK)
+   - Shows optimal route with start/end markers
+   - Displays distance and waypoints
+   
+2. **Multiple Paths Comparison** (LAX → BOS)
+   - Compares Dijkstra vs A* algorithms
+   - Shows 3 alternative routes with different colors
+   - Includes performance statistics
+   
+3. **Full Network Graph** (SEA → MIA highlighted)
+   - Displays all 12 airports and 58 routes
+   - Node size indicates airport connectivity
+   - Highlighted path shown in red
+
+**Features:**
+- Interactive zoom and pan
+- Hover for airport details
+- US Albers projection for accurate geography
+- Color-coded paths and markers
+
+### Deactivate Virtual Environment
+When finished:
+```bash
+deactivate
+```
+
+---
+
+## Project Structure
+
+```
+flight-pathfinder/
+├── algorithms/          # Dijkstra & A* implementations
+├── data/               # Data loading utilities
+├── examples/           # Demo scripts & visualizations
+├── models/             # Graph data structures
+├── tests/              # Unit tests (48 tests)
+├── visualization/      # Plotly visualization functions
+└── requirements.txt    # Python dependencies
+```
+
+---
+
+## Quick Start Example
+
+```python
+from models.graph import FlightNetwork, Airport, Route
+from algorithms.dijkstra import DijkstraPathFinder
+from visualization.path_plotter import plot_flight_path
+
+# Create network
+network = FlightNetwork()
+
+# Add airports
+network.add_airport(Airport("LAX", "Los Angeles Airport", 
+                            "Los Angeles", "USA", 33.9425, -118.408))
+network.add_airport(Airport("JFK", "JFK Airport", 
+                            "New York", "USA", 40.6413, -73.7781))
+
+# Add route
+network.add_route(Route("LAX", "JFK", 3944))
+
+# Find shortest path
+pathfinder = DijkstraPathFinder(network)
+path, distance = pathfinder.find_shortest_path("LAX", "JFK")
+
+# Visualize
+plot_flight_path(network, path, title=f"Path ({distance:.0f} km)")
+```
+
+---
+
+## Testing
+
+### Run All Tests
+```bash
+source venv/bin/activate
+python -m unittest discover tests -v
+```
+
+### Run Specific Test Files
+```bash
+python -m unittest tests.test_dijkstra -v
+python -m unittest tests.test_a_star -v
+python -m unittest tests.test_graph -v
+python -m unittest tests.test_visualization -v
+```
+
+### Test Coverage
+- Graph data structures (12 tests)
+- Dijkstra's algorithm (12 tests)
+- A* algorithm (13 tests)
+- Visualization functions (6 tests)
+- OpenSky API integration (5 tests)
+
+---
+
+## Dependencies
+
+All dependencies are managed via `requirements.txt`:
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| pandas | >=1.5.0 | Data processing |
+| numpy | >=1.21.0 | Numerical operations |
+| plotly | >=5.11.0 | Interactive visualizations |
+| networkx | >=2.8.0 | Graph algorithms |
+| requests | >=2.28.0 | API requests |
+| pytest | >=7.0.0 | Testing framework |
+
+**Installation:**
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
 ```
