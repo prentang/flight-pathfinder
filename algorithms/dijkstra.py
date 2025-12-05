@@ -67,15 +67,15 @@ class DijkstraPathFinder:
 
             if current_airport == destination:
                 break
-            current_airport_object = self.network.get_airport(current_airport)
-            for route in current_airport_object.routes:
-                neighbor = route.destination
-                new_distance = current_distance + route.weight
+            
+            neighbors = self.network.get_neighbors(current_airport)
+            for neighbor_code, edge_weight in neighbors:
+                new_distance = current_distance + edge_weight
 
-                if new_distance < distances[neighbor]:
-                    distances[neighbor] = new_distance
-                    previous_nodes[neighbor] = current_airport
-                    heapq.heappush(priority_queue, (new_distance, neighbor))
+                if new_distance < distances[neighbor_code]:
+                    distances[neighbor_code] = new_distance
+                    previous_nodes[neighbor_code] = current_airport
+                    heapq.heappush(priority_queue, (new_distance, neighbor_code))
                     self.last_run_stats["nodes_generated"] += 1
 
         if destination not in previous_nodes and destination != source:
@@ -128,14 +128,13 @@ class DijkstraPathFinder:
             visited.add(current_airport)
             self.last_run_stats["nodes_expanded"] += 1
 
-            current_airport_object = self.network.get_airport(current_airport)
-            for route in current_airport_object.routes:
-                neighbor = route.destination
-                new_distance = current_distance + route.weight
-                if new_distance < distances[neighbor]:
-                    distances[neighbor] = new_distance
-                    previous_nodes[neighbor] = current_airport
-                    heapq.heappush(priority_queue, (new_distance, neighbor))
+            neighbors = self.network.get_neighbors(current_airport)
+            for neighbor_code, edge_weight in neighbors:
+                new_distance = current_distance + edge_weight
+                if new_distance < distances[neighbor_code]:
+                    distances[neighbor_code] = new_distance
+                    previous_nodes[neighbor_code] = current_airport
+                    heapq.heappush(priority_queue, (new_distance, neighbor_code))
                     self.last_run_stats["nodes_generated"] += 1
 
         # Build paths to all destinations
@@ -194,34 +193,32 @@ class DijkstraPathFinder:
                 spur_node = last_path[spur_idx]
                 root_path = last_path[:spur_idx + 1]
 
-                removed_routes = []
+                removed_edges = []
 
                 # Remove edges that would cause duplicate paths with same root
                 for p, _ in shortest_paths:
                     if len(p) > spur_idx and p[:spur_idx + 1] == root_path:
                         from_node = p[spur_idx]
                         to_node = p[spur_idx + 1]
-                        airport_obj = self.network.get_airport(from_node)
-                        for route in airport_obj.routes[:]:
-                            if route.destination == to_node:
-                                removed_routes.append((from_node, route))
-                                airport_obj.routes.remove(route)
+                        weight = self.network.remove_edge(from_node, to_node)
+                        if weight is not None:
+                            removed_edges.append((from_node, to_node, weight))
 
                 # Optionally, remove outgoing edges from root_path nodes (except spur_node)
-                # to enforce vertex-simplicity:
                 root_nodes_to_block = root_path[:-1]
                 for node in root_nodes_to_block:
-                    airport_obj = self.network.get_airport(node)
-                    for route in airport_obj.routes[:]:
-                        removed_routes.append((node, route))
-                        airport_obj.routes.remove(route)
+                    neighbors = self.network.get_neighbors(node)[:]
+                    for dest, weight in neighbors:
+                        removed_weight = self.network.remove_edge(node, dest)
+                        if removed_weight is not None:
+                            removed_edges.append((node, dest, removed_weight))
 
                 # Shortest path from spur_node to destination in modified graph
                 spur_path, spur_dist = self.find_shortest_path(spur_node, destination)
 
-                # Restore all removed routes
-                for from_node, route in removed_routes:
-                    self.network.get_airport(from_node).routes.append(route)
+                # Restore all removed edges
+                for from_node, to_node, weight in removed_edges:
+                    self.network.add_edge(from_node, to_node, weight)
 
                 if spur_path:
                     # Combine root_path (without spur_node duplicate) and spur_path
@@ -230,12 +227,9 @@ class DijkstraPathFinder:
                     # Compute root_path distance using current graph weights
                     root_dist = 0.0
                     for i in range(len(root_path) - 1):
-                        from_airport = self.network.get_airport(root_path[i])
-                        to_airport = root_path[i + 1]
-                        for route in from_airport.routes:
-                            if route.destination == to_airport:
-                                root_dist += route.weight
-                                break
+                        edge_weight = self.network.get_edge_weight(root_path[i], root_path[i + 1])
+                        if edge_weight is not None:
+                            root_dist += edge_weight
 
                     total_dist = root_dist + spur_dist
 
