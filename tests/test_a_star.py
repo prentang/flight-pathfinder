@@ -2,157 +2,183 @@
 Test suite for A* algorithm implementation.
 """
 import unittest
-from unittest.mock import Mock, patch
 from algorithms.a_star import AStarPathFinder
 from algorithms.dijkstra import DijkstraPathFinder
 from models.graph import FlightNetwork, Airport, Route
-from data.route_loader import calculate_distance
+
 
 class TestAStarPathFinder(unittest.TestCase):
     """Test cases for A* algorithm implementation."""
     
     def setUp(self):
         """Set up test fixtures before each test method."""
-        # TODO: Create mock FlightNetwork for testing
-        # TODO: Add sample airports with known coordinates
-        # TODO: Add sample routes with known distances
-        # TODO: Initialize AStarPathFinder with test network
+        self.network = FlightNetwork()
         
+        airports_data = [
+            ("LAX", "Los Angeles", 33.9425, -118.408),
+            ("JFK", "New York", 40.6413, -73.7781),
+            ("ORD", "Chicago", 41.9742, -87.9073),
+            ("DFW", "Dallas", 32.8998, -97.0403),
+            ("ATL", "Atlanta", 33.6407, -84.4277),
+        ]
+        
+        for code, city, lat, lon in airports_data:
+            airport = Airport(
+                code=code,
+                name=f"{city} Airport",
+                city=city,
+                country="United States",
+                latitude=lat,
+                longitude=lon
+            )
+            self.network.add_airport(airport)
+        
+        routes_data = [
+            ("LAX", "ORD", 1745),
+            ("LAX", "DFW", 1235),
+            ("ORD", "JFK", 740),
+            ("ORD", "DFW", 800),
+            ("DFW", "JFK", 1380),
+            ("DFW", "ATL", 730),
+            ("ATL", "JFK", 760),
+        ]
+        
+        for source, dest, distance in routes_data:
+            route = Route(source=source, destination=dest, distance=distance)
+            self.network.add_route(route)
+        
+        self.pathfinder = AStarPathFinder(self.network)
     
-    def test_heuristic_functions(self):
-        """Test different heuristic function implementations."""
-        # TODO: Test euclidean distance heuristic
-        # TODO: Test haversine distance heuristic
-        # TODO: Test manhattan distance heuristic
-        # TODO: Verify heuristics are admissible (never overestimate)
-        pass
+    def test_shortest_path_with_euclidean_heuristic(self):
+        """Test A* with Euclidean heuristic."""
+        path, cost = self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="euclidean")
+        
+        self.assertIsNotNone(path)
+        self.assertGreater(len(path), 0)
+        self.assertEqual(path[0], "LAX")
+        self.assertEqual(path[-1], "JFK")
+        self.assertGreater(cost, 0)
     
-    def test_shortest_path_optimality(self):
+    def test_shortest_path_with_haversine_heuristic(self):
+        """Test A* with Haversine heuristic."""
+        path, cost = self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="haversine")
+        
+        self.assertIsNotNone(path)
+        self.assertGreater(len(path), 0)
+        self.assertEqual(path[0], "LAX")
+        self.assertEqual(path[-1], "JFK")
+    
+    def test_shortest_path_with_manhattan_heuristic(self):
+        """Test A* with Manhattan heuristic."""
+        path, cost = self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="manhattan")
+        
+        self.assertIsNotNone(path)
+        self.assertGreater(len(path), 0)
+        self.assertEqual(path[0], "LAX")
+        self.assertEqual(path[-1], "JFK")
+    
+    def test_same_source_destination(self):
+        """Test case where source and destination are the same."""
+        path, cost = self.pathfinder.find_shortest_path("LAX", "LAX")
+        
+        self.assertEqual(path, ["LAX"])
+        self.assertEqual(cost, 0.0)
+    
+    def test_invalid_source_airport(self):
+        """Test with invalid source airport code."""
+        with self.assertRaises(ValueError):
+            self.pathfinder.find_shortest_path("INVALID", "JFK")
+    
+    def test_invalid_destination_airport(self):
+        """Test with invalid destination airport code."""
+        with self.assertRaises(ValueError):
+            self.pathfinder.find_shortest_path("LAX", "INVALID")
+    
+    def test_invalid_heuristic_type(self):
+        """Test with invalid heuristic type."""
+        with self.assertRaises(ValueError):
+            self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="invalid")
+    
+    def test_no_path_available(self):
+        """Test case where no route exists between airports."""
+        isolated_airport = Airport(
+            code="XXX",
+            name="Isolated Airport",
+            city="Isolated",
+            country="United States",
+            latitude=0.0,
+            longitude=0.0
+        )
+        self.network.add_airport(isolated_airport)
+        
+        path, cost = self.pathfinder.find_shortest_path("LAX", "XXX")
+        
+        self.assertEqual(path, [])
+        self.assertEqual(cost, float('inf'))
+    
+    def test_algorithm_stats(self):
+        """Test that algorithm statistics are tracked correctly."""
+        self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="euclidean")
+        stats = self.pathfinder.get_algorithm_stats()
+        
+        self.assertIn("nodes_expanded", stats)
+        self.assertIn("nodes_generated", stats)
+        self.assertIn("execution_time", stats)
+        self.assertIn("path_cost", stats)
+        self.assertIn("heuristic_calls", stats)
+        
+        self.assertGreater(stats["nodes_expanded"], 0)
+        self.assertGreater(stats["execution_time"], 0)
+        self.assertGreater(stats["heuristic_calls"], 0)
+    
+    def test_heuristic_caching(self):
+        """Test that heuristic values are cached properly."""
+        self.pathfinder.heuristic_cache.clear()
+        
+        self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="euclidean")
+        cache_size_after_first = len(self.pathfinder.heuristic_cache)
+        
+        self.assertGreater(cache_size_after_first, 0)
+    
+    def test_path_optimality_vs_dijkstra(self):
         """Test that A* finds optimal paths like Dijkstra."""
-        # TODO: Compare A* results with Dijkstra on same problems
-        # TODO: Verify path optimality is maintained
-        # TODO: Test on various network topologies
-        pass
+        dijkstra = DijkstraPathFinder(self.network)
+        
+        dijkstra_path, dijkstra_cost = dijkstra.find_shortest_path("LAX", "JFK")
+        astar_path, astar_cost = self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="haversine")
+        
+        self.assertEqual(dijkstra_cost, astar_cost)
     
     def test_heuristic_effectiveness(self):
-        """Test that heuristics improve search efficiency."""
-        # TODO: Compare nodes visited: A* vs Dijkstra
-        # TODO: Verify A* visits fewer nodes than Dijkstra
-        # TODO: Measure performance improvement with good heuristics
-        pass
+        """Test that A* explores fewer nodes than Dijkstra."""
+        dijkstra = DijkstraPathFinder(self.network)
+        
+        dijkstra.find_shortest_path("LAX", "JFK")
+        dijkstra_stats = dijkstra.get_algorithm_stats()
+        
+        self.pathfinder.find_shortest_path("LAX", "JFK", heuristic="haversine")
+        astar_stats = self.pathfinder.get_algorithm_stats()
+        
+        self.assertLessEqual(
+            astar_stats["nodes_expanded"],
+            dijkstra_stats["nodes_expanded"]
+        )
     
-    def test_different_heuristic_types(self):
-        """Test A* with different heuristic functions."""
-        # TODO: Test with euclidean heuristic
-        # TODO: Test with haversine heuristic
-        # TODO: Test with manhattan heuristic
-        # TODO: Compare performance of different heuristics
-        pass
-    
-    def test_zero_heuristic_equals_dijkstra(self):
-        """Test that A* with zero heuristic equals Dijkstra."""
-        # TODO: Implement zero heuristic (always returns 0)
-        # TODO: Verify A* with zero heuristic finds same paths as Dijkstra
-        # TODO: Compare node visitation patterns
-        pass
-    
-    def test_admissible_heuristic_properties(self):
-        """Test that heuristics maintain admissibility."""
-        # TODO: Verify heuristic never overestimates actual distance
-        # TODO: Test on various airport pairs
-        # TODO: Check heuristic consistency (triangle inequality)
-        pass
-    
-    def test_algorithm_comparison_methods(self):
-        """Test A* comparison utilities."""
-        # TODO: Test compare_with_dijkstra method
-        # TODO: Verify comparison metrics are accurate
-        # TODO: Test performance measurement functionality
-        pass
-    
-    def test_coordinate_based_heuristics(self):
-        """Test heuristics using airport coordinate data."""
-        # TODO: Test heuristics with real airport coordinates
-        # TODO: Verify geographic distance calculations
-        # TODO: Compare with actual flight distances
-        pass
-    
-    def test_edge_cases(self):
-        """Test A* algorithm edge cases."""
-        # TODO: Test with source == destination
-        # TODO: Test with no path available
-        # TODO: Test with invalid airports
-        # TODO: Test with network containing cycles
-        pass
-
-
-class TestAStarVsDijkstra(unittest.TestCase):
-    """Comparative tests between A* and Dijkstra algorithms."""
-    
-    def setUp(self):
-        """Set up comparative test fixtures."""
-        # TODO: Create shared test network
-        # TODO: Initialize both A* and Dijkstra pathfinders
-        # TODO: Prepare test cases for comparison
-        pass
-    
-    def test_path_optimality_equivalence(self):
-        """Verify both algorithms find equally optimal paths."""
-        # TODO: Run both algorithms on same source/destination pairs
-        # TODO: Verify path lengths are identical
-        # TODO: Allow for different but equally optimal paths
-        pass
-    
-    def test_performance_comparison(self):
-        """Compare performance characteristics of both algorithms."""
-        # TODO: Measure execution time for both algorithms
-        # TODO: Count nodes visited by each algorithm
-        # TODO: Verify A* visits fewer or equal nodes
-        # TODO: Measure memory usage patterns
-        pass
-    
-    def test_search_space_reduction(self):
-        """Test A* search space reduction compared to Dijkstra."""
-        # TODO: Track nodes expanded by each algorithm
-        # TODO: Verify A* explores smaller search space
-        # TODO: Quantify search space reduction percentage
-        pass
-    
-    def test_scalability_comparison(self):
-        """Test how both algorithms scale with network size."""
-        # TODO: Test on networks of different sizes
-        # TODO: Measure performance scaling patterns
-        # TODO: Identify crossover points where A* advantage is clear
-        pass
-
-
-class TestAStarIntegration(unittest.TestCase):
-    """Integration tests for A* with real flight data."""
-    
-    def setUp(self):
-        """Set up integration test fixtures."""
-        # TODO: Load real airport coordinate data
-        # TODO: Create realistic flight network
-        # TODO: Initialize A* pathfinder with real data
-        pass
-    
-    def test_real_world_heuristics(self):
-        """Test heuristic accuracy with real airport coordinates."""
-        # TODO: Compare heuristic estimates with actual flight distances
-        # TODO: Verify heuristics are admissible for real data
-        # TODO: Test geographic distance calculations
-        pass
-    
-    def test_cross_country_efficiency(self):
-        """Test A* efficiency on long-distance routes."""
-        # TODO: Test coast-to-coast pathfinding
-        # TODO: Measure search space reduction on long routes
-        # TODO: Verify A* advantage is more pronounced on longer paths
-        pass
+    def test_compare_with_dijkstra(self):
+        """Test the compare_with_dijkstra method."""
+        comparison = self.pathfinder.compare_with_dijkstra("LAX", "JFK")
+        
+        self.assertIn("source", comparison)
+        self.assertIn("destination", comparison)
+        self.assertIn("dijkstra", comparison)
+        self.assertIn("astar", comparison)
+        self.assertIn("comparison", comparison)
+        
+        self.assertEqual(comparison["source"], "LAX")
+        self.assertEqual(comparison["destination"], "JFK")
+        
+        self.assertTrue(comparison["comparison"]["paths_are_optimal"])
 
 
 if __name__ == "__main__":
-    # TODO: Configure test runner with performance profiling
-    # TODO: Add memory usage monitoring
-    # TODO: Generate algorithm comparison reports
     unittest.main()
