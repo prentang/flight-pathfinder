@@ -24,7 +24,7 @@ def fetch_flights_from_opensky(username: Optional[str] = None, password: Optiona
     try:
         response = requests.get(API_URL, auth=auth, timeout=15)
         response.raise_for_status()
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"API request failed: {e}")
         return pd.DataFrame()
 

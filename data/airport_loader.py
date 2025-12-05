@@ -11,7 +11,6 @@ def load_airport_data(filepath: str) -> Dict:
     Returns:
         Dictionary containing airport data
     """
-    # TODO: Implement airport data loading
     raise NotImplementedError("load_airport_data not yet implemented")
 
 
@@ -22,7 +21,6 @@ def get_us_airports() -> List[Dict]:
     Returns:
         List of dictionaries containing US airport data
     """
-    # TODO: Implement US airports retrieval
     raise NotImplementedError("get_us_airports not yet implemented")
 
 
@@ -36,7 +34,6 @@ def get_airport_coordinates(airport_code: str) -> Optional[Tuple[float, float]]:
     Returns:
         Tuple of (latitude, longitude) or None if not found
     """
-    # TODO: Implement airport coordinate lookup
     raise NotImplementedError("get_airport_coordinates not yet implemented")
 
 
@@ -50,5 +47,4 @@ def validate_airport_code(airport_code: str) -> bool:
     Returns:
         True if valid, False otherwise
     """
-    # TODO: Implement airport code validation
     raise NotImplementedError("validate_airport_code not yet implemented")
