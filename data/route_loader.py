@@ -2,12 +2,14 @@
 Route data loader module.
 Handles loading and processing flight route data between airports.
 """
-import pandas as pd
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
 import math
 
+if TYPE_CHECKING:
+    import pandas as pd
 
-def load_route_data(source: str = "openflights") -> pd.DataFrame:
+
+def load_route_data(source: str = "openflights"):
     """
     Load flight route data from specified source.
     
@@ -17,6 +19,7 @@ def load_route_data(source: str = "openflights") -> pd.DataFrame:
     Returns:
         DataFrame with route information
     """
+    import pandas as pd
     # TODO: Load route data from OpenFlights routes dataset
     # TODO: Parse routes CSV containing airline, source, destination airports
     # TODO: Filter to US domestic routes or include international
@@ -75,7 +78,7 @@ def estimate_flight_time(distance_km: float, aircraft_speed_kmh: float = 800) ->
     pass
 
 
-def generate_route_network(airports_df: pd.DataFrame, max_distance_km: float = 5000) -> pd.DataFrame:
+def generate_route_network(airports_df, max_distance_km: float = 5000):
     """
     Generate all possible routes between airports within distance threshold.
     
@@ -86,6 +89,7 @@ def generate_route_network(airports_df: pd.DataFrame, max_distance_km: float = 5
     Returns:
         DataFrame with all possible routes and their weights
     """
+    import pandas as pd
     # TODO: Create routes between all airport pairs within max distance
     # TODO: Calculate distance and flight time for each route
     # TODO: Filter out unrealistic routes (too short/long)
@@ -95,7 +99,7 @@ def generate_route_network(airports_df: pd.DataFrame, max_distance_km: float = 5
     pass
 
 
-def add_route_weights(routes_df: pd.DataFrame, weight_type: str = "distance") -> pd.DataFrame:
+def add_route_weights(routes_df, weight_type: str = "distance"):
     """
     Add weight column to routes for pathfinding algorithms.
     
@@ -106,6 +110,7 @@ def add_route_weights(routes_df: pd.DataFrame, weight_type: str = "distance") ->
     Returns:
         DataFrame with added weight column
     """
+    import pandas as pd
     # TODO: Add weight column based on weight_type parameter
     # TODO: For "distance": use distance_km as weight
     # TODO: For "time": use flight_time_hours as weight  

@@ -2,71 +2,86 @@
 Test suite for flight network graph data structures.
 """
 import unittest
-from unittest.mock import Mock, patch
 from models.graph import FlightNetwork, Airport, Route
-import pandas as pd
 
 
 class TestAirport(unittest.TestCase):
     """Test cases for Airport data structure."""
     
-    def setUp(self):
-        """Set up test fixtures for Airport tests."""
-        # TODO: Create sample airport data for testing
-        # TODO: Include various airport types (major, regional, international)
-        pass
-    
     def test_airport_creation(self):
         """Test Airport object creation and initialization."""
-        # TODO: Test creating Airport with all required fields
-        # TODO: Verify all properties are set correctly
-        # TODO: Test with optional fields missing
-        pass
+        airport = Airport(
+            code="LAX",
+            name="Los Angeles International Airport",
+            city="Los Angeles",
+            country="United States",
+            latitude=33.9425,
+            longitude=-118.408
+        )
+        
+        self.assertEqual(airport.code, "LAX")
+        self.assertEqual(airport.name, "Los Angeles International Airport")
+        self.assertEqual(airport.city, "Los Angeles")
+        self.assertEqual(airport.country, "United States")
+        self.assertEqual(airport.latitude, 33.9425)
+        self.assertEqual(airport.longitude, -118.408)
     
     def test_airport_equality(self):
-        """Test Airport equality and hashing methods."""
-        # TODO: Test __eq__ method with identical airports
-        # TODO: Test __eq__ method with different airports
-        # TODO: Test __hash__ method for use in sets/dicts
-        pass
-    
-    def test_airport_string_representation(self):
-        """Test Airport string representation methods."""
-        # TODO: Test __str__ method output format
-        # TODO: Test __repr__ method for debugging
-        # TODO: Verify readable airport information display
-        pass
+        """Test Airport equality."""
+        airport1 = Airport(
+            code="LAX",
+            name="Los Angeles International Airport",
+            city="Los Angeles",
+            country="United States",
+            latitude=33.9425,
+            longitude=-118.408
+        )
+        
+        airport2 = Airport(
+            code="LAX",
+            name="Los Angeles International Airport",
+            city="Los Angeles",
+            country="United States",
+            latitude=33.9425,
+            longitude=-118.408
+        )
+        
+        airport3 = Airport(
+            code="JFK",
+            name="John F. Kennedy International Airport",
+            city="New York",
+            country="United States",
+            latitude=40.6413,
+            longitude=-73.7781
+        )
+        
+        self.assertEqual(airport1, airport2)
+        self.assertNotEqual(airport1, airport3)
 
 
 class TestRoute(unittest.TestCase):
     """Test cases for Route data structure."""
     
-    def setUp(self):
-        """Set up test fixtures for Route tests."""
-        # TODO: Create sample route data for testing
-        # TODO: Include routes with different weights and properties
-        pass
-    
     def test_route_creation(self):
         """Test Route object creation and initialization."""
-        # TODO: Test creating Route with required fields
-        # TODO: Verify source, destination, and weight are set
-        # TODO: Test with additional route properties
-        pass
+        route = Route(
+            source="LAX",
+            destination="JFK",
+            distance=3944.0
+        )
+        
+        self.assertEqual(route.source, "LAX")
+        self.assertEqual(route.destination, "JFK")
+        self.assertEqual(route.distance, 3944.0)
     
-    def test_route_comparison(self):
-        """Test Route comparison methods for priority queue."""
-        # TODO: Test __lt__ method for heap operations
-        # TODO: Test comparison based on weights
-        # TODO: Verify routes sort correctly by weight
-        pass
-    
-    def test_route_bidirectionality(self):
-        """Test handling of bidirectional routes."""
-        # TODO: Test creating reverse routes
-        # TODO: Verify bidirectional route properties
-        # TODO: Test route equality in both directions
-        pass
+    def test_route_equality(self):
+        """Test Route equality."""
+        route1 = Route(source="LAX", destination="JFK", distance=3944.0)
+        route2 = Route(source="LAX", destination="JFK", distance=3944.0)
+        route3 = Route(source="JFK", destination="LAX", distance=3944.0)
+        
+        self.assertEqual(route1, route2)
+        self.assertNotEqual(route1, route3)
 
 
 class TestFlightNetwork(unittest.TestCase):
@@ -74,110 +89,137 @@ class TestFlightNetwork(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures for FlightNetwork tests."""
-        # TODO: Create empty FlightNetwork for testing
-        # TODO: Prepare sample airports and routes data
-        # TODO: Create test network configurations
-        pass
+        self.network = FlightNetwork()
+        
+        self.lax = Airport(
+            code="LAX",
+            name="Los Angeles International Airport",
+            city="Los Angeles",
+            country="United States",
+            latitude=33.9425,
+            longitude=-118.408
+        )
+        
+        self.jfk = Airport(
+            code="JFK",
+            name="John F. Kennedy International Airport",
+            city="New York",
+            country="United States",
+            latitude=40.6413,
+            longitude=-73.7781
+        )
+        
+        self.ord = Airport(
+            code="ORD",
+            name="O'Hare International Airport",
+            city="Chicago",
+            country="United States",
+            latitude=41.9742,
+            longitude=-87.9073
+        )
     
     def test_network_initialization(self):
         """Test FlightNetwork initialization."""
-        # TODO: Test empty network creation
-        # TODO: Verify initial data structures are empty
-        # TODO: Test network metadata initialization
-        pass
+        network = FlightNetwork()
+        self.assertIsInstance(network.airports, dict)
+        self.assertIsInstance(network.adjacency_list, dict)
+        self.assertEqual(len(network.airports), 0)
+        self.assertEqual(len(network.adjacency_list), 0)
     
     def test_add_airport(self):
         """Test adding airports to the network."""
-        # TODO: Test adding single airport
-        # TODO: Test adding multiple airports
-        # TODO: Test adding duplicate airports (should handle gracefully)
-        # TODO: Verify adjacency list is created for new airports
-        pass
+        self.network.add_airport(self.lax)
+        
+        self.assertIn("LAX", self.network.airports)
+        self.assertEqual(self.network.airports["LAX"], self.lax)
+        self.assertIn("LAX", self.network.adjacency_list)
+        self.assertEqual(len(self.network.adjacency_list["LAX"]), 0)
+        
+        self.network.add_airport(self.jfk)
+        self.assertEqual(len(self.network.airports), 2)
+    
+    def test_add_duplicate_airport(self):
+        """Test adding duplicate airports."""
+        self.network.add_airport(self.lax)
+        self.network.add_airport(self.lax)
+        
+        self.assertEqual(len(self.network.airports), 1)
     
     def test_add_route(self):
         """Test adding routes to the network."""
-        # TODO: Test adding route between existing airports
-        # TODO: Test adding route with non-existent airports
-        # TODO: Test bidirectional route addition
-        # TODO: Test updating existing route weights
-        pass
+        self.network.add_airport(self.lax)
+        self.network.add_airport(self.jfk)
+        
+        route = Route(source="LAX", destination="JFK", distance=3944.0)
+        self.network.add_route(route)
+        
+        neighbors = self.network.get_neighbors("LAX")
+        self.assertEqual(len(neighbors), 1)
+        self.assertEqual(neighbors[0], ("JFK", 3944.0))
+    
+    def test_add_multiple_routes(self):
+        """Test adding multiple routes from one airport."""
+        self.network.add_airport(self.lax)
+        self.network.add_airport(self.jfk)
+        self.network.add_airport(self.ord)
+        
+        route1 = Route(source="LAX", destination="JFK", distance=3944.0)
+        route2 = Route(source="LAX", destination="ORD", distance=2800.0)
+        
+        self.network.add_route(route1)
+        self.network.add_route(route2)
+        
+        neighbors = self.network.get_neighbors("LAX")
+        self.assertEqual(len(neighbors), 2)
     
     def test_get_neighbors(self):
         """Test retrieving airport neighbors."""
-        # TODO: Test getting neighbors for airport with connections
-        # TODO: Test getting neighbors for isolated airport
-        # TODO: Test getting neighbors for non-existent airport
-        # TODO: Verify neighbor weights are correct
-        pass
+        self.network.add_airport(self.lax)
+        self.network.add_airport(self.jfk)
+        
+        route = Route(source="LAX", destination="JFK", distance=3944.0)
+        self.network.add_route(route)
+        
+        neighbors = self.network.get_neighbors("LAX")
+        self.assertIsInstance(neighbors, list)
+        self.assertEqual(len(neighbors), 1)
+        
+        empty_neighbors = self.network.get_neighbors("JFK")
+        self.assertEqual(len(empty_neighbors), 0)
+        
+        nonexistent_neighbors = self.network.get_neighbors("XXX")
+        self.assertEqual(len(nonexistent_neighbors), 0)
     
-    def test_airport_lookup(self):
+    def test_get_airport(self):
         """Test airport lookup methods."""
-        # TODO: Test get_airport method with valid codes
-        # TODO: Test get_airport with invalid codes
-        # TODO: Test has_airport method
-        # TODO: Test case-insensitive lookup
-        pass
+        self.network.add_airport(self.lax)
+        
+        airport = self.network.get_airport("LAX")
+        self.assertIsNotNone(airport)
+        self.assertEqual(airport.code, "LAX")
+        
+        nonexistent = self.network.get_airport("XXX")
+        self.assertIsNone(nonexistent)
     
-    def test_network_statistics(self):
-        """Test network statistics calculation."""
-        # TODO: Test get_network_stats method
-        # TODO: Verify airport and route counts
-        # TODO: Test network density calculation
-        # TODO: Test connectivity metrics
-        pass
-    
-    def test_load_from_dataframes(self):
-        """Test loading network from pandas DataFrames."""
-        # TODO: Create sample airports and routes DataFrames
-        # TODO: Test loading data into empty network
-        # TODO: Verify all airports and routes are loaded correctly
-        # TODO: Test data validation during loading
-        pass
-    
-    def test_network_connectivity(self):
-        """Test network connectivity properties."""
-        # TODO: Test if network is connected
-        # TODO: Find connected components
-        # TODO: Test reachability between airports
-        # TODO: Identify isolated airports
-        pass
-
-
-class TestFlightNetworkIntegration(unittest.TestCase):
-    """Integration tests for FlightNetwork with realistic data."""
-    
-    def setUp(self):
-        """Set up integration test fixtures."""
-        # TODO: Create realistic network with major US airports
-        # TODO: Add routes between major hubs
-        # TODO: Include regional airports and connections
-        pass
-    
-    def test_realistic_network_properties(self):
-        """Test properties of realistic flight network."""
-        # TODO: Verify network has expected scale-free properties
-        # TODO: Test hub airports have high connectivity
-        # TODO: Verify small-world network characteristics
-        pass
-    
-    def test_major_hub_connectivity(self):
-        """Test connectivity of major airport hubs."""
-        # TODO: Verify major hubs (ATL, LAX, CHI) are highly connected
-        # TODO: Test paths between major hubs exist and are short
-        # TODO: Verify hub airports serve as intermediates for many paths
-        pass
-    
-    def test_network_robustness(self):
-        """Test network robustness to airport/route removal."""
-        # TODO: Test removing major hub airports
-        # TODO: Test removing critical routes
-        # TODO: Verify network maintains connectivity
-        # TODO: Test graceful degradation patterns
-        pass
+    def test_network_with_bidirectional_routes(self):
+        """Test network with bidirectional routes."""
+        self.network.add_airport(self.lax)
+        self.network.add_airport(self.jfk)
+        
+        route1 = Route(source="LAX", destination="JFK", distance=3944.0)
+        route2 = Route(source="JFK", destination="LAX", distance=3944.0)
+        
+        self.network.add_route(route1)
+        self.network.add_route(route2)
+        
+        lax_neighbors = self.network.get_neighbors("LAX")
+        jfk_neighbors = self.network.get_neighbors("JFK")
+        
+        self.assertEqual(len(lax_neighbors), 1)
+        self.assertEqual(len(jfk_neighbors), 1)
+        self.assertEqual(lax_neighbors[0][0], "JFK")
+        self.assertEqual(jfk_neighbors[0][0], "LAX")
 
 
 if __name__ == "__main__":
-    # TODO: Configure test runner
-    # TODO: Add test data generation utilities
-    # TODO: Include network visualization for debugging
     unittest.main()
