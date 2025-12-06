@@ -205,3 +205,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project-specific
+# OpenFlights data files (auto-downloaded)
+data/openflights/*.dat
+
+# Benchmark results (generated files)
+benchmarks/results_*.txt
+benchmarks/results_*.json
+benchmarks/results_*.csv
+
+# Old backup files
+*_OLD.md
+*_NEW.md
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

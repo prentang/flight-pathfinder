@@ -415,7 +415,39 @@ def setup_openflights_data() -> tuple[pd.DataFrame, pd.DataFrame]:
         print("Proceeding with data anyway...")
     
     # Return tuple of US airports and routes DataFrames
-    return us_airports, us_routes
+    # Standardize column names for compatibility with FlightNetwork
+    us_airports_standardized = us_airports.rename(columns={
+        'IATA': 'iata_code',
+        'Name': 'name',
+        'City': 'city',
+        'Country': 'country',
+        'Latitude': 'latitude',
+        'Longitude': 'longitude'
+    })
+    
+    us_routes_standardized = us_routes.rename(columns={
+        'Source airport': 'source_airport',
+        'Destination airport': 'dest_airport'
+    })
+    
+    # Calculate distances for routes
+    from data.route_loader import calculate_distance
+    us_routes_standardized['distance_km'] = us_routes_standardized.apply(
+        lambda row: calculate_distance(
+            us_airports_standardized[us_airports_standardized['iata_code'] == row['source_airport']]['latitude'].values[0],
+            us_airports_standardized[us_airports_standardized['iata_code'] == row['source_airport']]['longitude'].values[0],
+            us_airports_standardized[us_airports_standardized['iata_code'] == row['dest_airport']]['latitude'].values[0],
+            us_airports_standardized[us_airports_standardized['iata_code'] == row['dest_airport']]['longitude'].values[0]
+        ) if len(us_airports_standardized[us_airports_standardized['iata_code'] == row['source_airport']]) > 0 
+           and len(us_airports_standardized[us_airports_standardized['iata_code'] == row['dest_airport']]) > 0
+        else 0,
+        axis=1
+    )
+    
+    # Filter out routes with 0 distance (missing airports)
+    us_routes_standardized = us_routes_standardized[us_routes_standardized['distance_km'] > 0]
+    
+    return us_airports_standardized, us_routes_standardized
 
 
 if __name__ == "__main__":

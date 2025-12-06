@@ -4,29 +4,39 @@ Handles loading and processing flight route data between airports.
 """
 from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
 import math
+import pandas as pd
 
 if TYPE_CHECKING:
     import pandas as pd
 
 
-def load_route_data(source: str = "openflights"):
+def load_route_data(filepath: str) -> pd.DataFrame:
     """
-    Load flight route data from specified source.
+    Load flight route data from a CSV file.
     
     Args:
-        source: Data source ("openflights", "csv", "computed")
+        filepath: Path to the route data file (CSV format)
     
     Returns:
-        DataFrame with route information
+        DataFrame with columns: airline, source_airport, dest_airport, equipment, stops
     """
-    import pandas as pd
-    # TODO: Load route data from OpenFlights routes dataset
-    # TODO: Parse routes CSV containing airline, source, destination airports
-    # TODO: Filter to US domestic routes or include international
-    # TODO: Clean and validate route data
-    # TODO: Return DataFrame with columns:
-    #       - airline, source_airport, dest_airport, equipment, stops
-    pass
+    df = pd.read_csv(filepath)
+    
+    # Standardize column names if needed
+    column_mapping = {
+        'source': 'source_airport',
+        'destination': 'dest_airport',
+        'dest': 'dest_airport',
+        'codeshare': 'equipment',
+        'num_stops': 'stops'
+    }
+    df = df.rename(columns=column_mapping)
+    
+    # Filter to direct flights only (stops == 0)
+    if 'stops' in df.columns:
+        df = df[df['stops'] == 0]
+    
+    return df
 
 
 def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -66,54 +76,91 @@ def estimate_flight_time(distance_km: float, aircraft_speed_kmh: float = 800) ->
     
     Args:
         distance_km: Distance in kilometers
-        aircraft_speed_kmh: Average aircraft speed in km/h
+        aircraft_speed_kmh: Average aircraft speed in km/h (default 800 km/h)
     
     Returns:
         Estimated flight time in hours
     """
-    # TODO: Calculate basic flight time = distance / speed
-    # TODO: Add taxi, takeoff, landing time (typically 30-45 minutes)
-    # TODO: Consider different speeds for short vs long haul flights
-    # TODO: Handle minimum flight time for very short distances
-    pass
+    # Base flight time
+    flight_time = distance_km / aircraft_speed_kmh
+    
+    # Add overhead for taxi, takeoff, landing (0.5 hours = 30 minutes)
+    overhead_hours = 0.5
+    
+    # For very short flights, use minimum time
+    min_flight_time = 0.75  # 45 minutes minimum
+    
+    total_time = flight_time + overhead_hours
+    return max(total_time, min_flight_time)
 
 
-def generate_route_network(airports_df, max_distance_km: float = 5000):
+def generate_route_network(airports_df: pd.DataFrame, max_distance_km: float = 5000) -> pd.DataFrame:
     """
     Generate all possible routes between airports within distance threshold.
     
     Args:
-        airports_df: DataFrame with airport data
-        max_distance_km: Maximum distance for direct routes
+        airports_df: DataFrame with airport data (must have iata_code, latitude, longitude)
+        max_distance_km: Maximum distance for direct routes (default 5000 km)
     
     Returns:
-        DataFrame with all possible routes and their weights
+        DataFrame with columns: source_airport, dest_airport, distance_km, flight_time_hours
     """
-    import pandas as pd
-    # TODO: Create routes between all airport pairs within max distance
-    # TODO: Calculate distance and flight time for each route
-    # TODO: Filter out unrealistic routes (too short/long)
-    # TODO: Return DataFrame with columns:
-    #       - source_airport, dest_airport, distance_km, flight_time_hours
-    # TODO: Consider adding route frequency/popularity weights
-    pass
+    routes = []
+    airports_list = airports_df.to_dict('records')
+    
+    # Generate routes between all airport pairs
+    for i, src_airport in enumerate(airports_list):
+        for dest_airport in airports_list[i+1:]:  # Avoid duplicates and self-loops
+            # Calculate distance
+            distance = calculate_distance(
+                src_airport['latitude'], src_airport['longitude'],
+                dest_airport['latitude'], dest_airport['longitude']
+            )
+            
+            # Filter by max distance (realistic for commercial flights)
+            if distance <= max_distance_km and distance >= 50:  # Min 50km to avoid too short
+                flight_time = estimate_flight_time(distance)
+                
+                # Add both directions (bidirectional routes)
+                routes.append({
+                    'source_airport': src_airport['iata_code'],
+                    'dest_airport': dest_airport['iata_code'],
+                    'distance_km': round(distance, 2),
+                    'flight_time_hours': round(flight_time, 2)
+                })
+                routes.append({
+                    'source_airport': dest_airport['iata_code'],
+                    'dest_airport': src_airport['iata_code'],
+                    'distance_km': round(distance, 2),
+                    'flight_time_hours': round(flight_time, 2)
+                })
+    
+    return pd.DataFrame(routes)
 
 
-def add_route_weights(routes_df, weight_type: str = "distance"):
+def add_route_weights(routes_df: pd.DataFrame, weight_type: str = "distance") -> pd.DataFrame:
     """
     Add weight column to routes for pathfinding algorithms.
     
     Args:
-        routes_df: DataFrame with route data
-        weight_type: Type of weight ("distance", "time", "cost")
+        routes_df: DataFrame with route data (must have distance_km, flight_time_hours)
+        weight_type: Type of weight to use ("distance", "time", "cost")
     
     Returns:
-        DataFrame with added weight column
+        DataFrame with added 'weight' column
     """
-    import pandas as pd
-    # TODO: Add weight column based on weight_type parameter
-    # TODO: For "distance": use distance_km as weight
-    # TODO: For "time": use flight_time_hours as weight  
-    # TODO: For "cost": implement cost estimation based on distance/time
-    # TODO: Normalize weights if needed for algorithm performance
-    pass
+    routes_with_weights = routes_df.copy()
+    
+    if weight_type == "distance":
+        # Use distance in km as weight
+        routes_with_weights['weight'] = routes_df['distance_km']
+    elif weight_type == "time":
+        # Use flight time in hours as weight
+        routes_with_weights['weight'] = routes_df['flight_time_hours']
+    elif weight_type == "cost":
+        # Estimate cost based on distance (rough approximation: $0.15 per km)
+        routes_with_weights['weight'] = routes_df['distance_km'] * 0.15
+    else:
+        raise ValueError(f"Unknown weight_type: {weight_type}. Use 'distance', 'time', or 'cost'.")
+    
+    return routes_with_weights

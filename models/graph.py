@@ -81,5 +81,34 @@ class FlightNetwork:
                 if dest == destination:
                     return weight
         return None
+    
+    def load_from_dataframes(self, airports_df, routes_df) -> None:
+        """
+        Load network from pandas DataFrames.
+        
+        Args:
+            airports_df: DataFrame with columns: iata_code, name, city, country, latitude, longitude
+            routes_df: DataFrame with columns: source_airport, dest_airport, distance_km
+        """
+        # Load airports
+        for _, row in airports_df.iterrows():
+            airport = Airport(
+                code=row['iata_code'],
+                name=row['name'],
+                city=row['city'],
+                country=row['country'],
+                latitude=row['latitude'],
+                longitude=row['longitude']
+            )
+            self.add_airport(airport)
+        
+        # Load routes
+        for _, row in routes_df.iterrows():
+            route = Route(
+                source=row['source_airport'],
+                destination=row['dest_airport'],
+                distance=row['distance_km']
+            )
+            self.add_route(route)
 
 __all__ = ["FlightNetwork", "Airport", "Route"]

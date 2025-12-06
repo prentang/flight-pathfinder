@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple, Optional, Set
 import heapq
 import math
 import time
+import tracemalloc
 from models.graph import FlightNetwork, Airport, Route
 from data.route_loader import calculate_distance
 
@@ -40,6 +41,7 @@ class AStarPathFinder:
         """
         # Track execution time
         start_time = time.time()
+        tracemalloc.start()
 
         # Reset stats for last run
         self.last_run_stats = {
@@ -48,6 +50,8 @@ class AStarPathFinder:
             "execution_time": 0,
             "path_cost": 0,
             "heuristic_calls": 0,
+            "peak_memory_bytes": 0,
+            "algorithm": "A*"
         }
 
         if source not in self.network.airports:
@@ -75,6 +79,9 @@ class AStarPathFinder:
                 path = self._reconstruct_path(came_from, current)
                 self.last_run_stats["path_cost"] = g_score[current]
                 self.last_run_stats["execution_time"] = time.time() - start_time
+                current_mem, peak_mem = tracemalloc.get_traced_memory()
+                self.last_run_stats["peak_memory_bytes"] = peak_mem
+                tracemalloc.stop()
 
                 return (path, g_score[current])
             
@@ -96,6 +103,9 @@ class AStarPathFinder:
                     heapq.heappush(open_set, (f_score[neighbor_code], counter, neighbor_code))
 
         self.last_run_stats["execution_time"] = time.time() - start_time
+        current_mem, peak_mem = tracemalloc.get_traced_memory()
+        self.last_run_stats["peak_memory_bytes"] = peak_mem
+        tracemalloc.stop()
         return ([], float('inf'))
             
     def _reconstruct_path(self, came_from: Dict[str, str], current: str) -> List[str]:
