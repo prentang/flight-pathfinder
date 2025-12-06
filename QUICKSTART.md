@@ -1,7 +1,5 @@
 # Quick Start Guide
 
-## Simple Usage - 5 Easy Scripts
-
 ### 1. Find Fastest Path (CLI)
 
 ```bash
@@ -56,7 +54,7 @@ python visualize.py SEA MIA
 python visualize.py SFO BOS
 ```
 
-Opens an interactive map in your browser showing the optimal path.
+Opens an interactive map in your browser.
 
 ---
 
@@ -80,7 +78,7 @@ python simulate_search.py LAX JFK
 python simulate_search.py SEA MIA
 ```
 
-Creates a side-by-side visualization showing which airports each algorithm explores during the search. This dramatically illustrates why A* is so much more efficient!
+Creates a side-by-side visualization showing which airports each algorithm explores during the search.
 
 **Example Output:**
 ```
@@ -115,7 +113,7 @@ python find_alternatives.py LAX JFK --compare
 python find_alternatives.py LAX JFK -v -c
 ```
 
-Shows alternative routes with different numbers of layovers. Perfect for comparing direct vs connecting flights!
+Shows alternative routes with different numbers of layovers.
 
 **Example Output:**
 ```

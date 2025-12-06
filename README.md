@@ -22,7 +22,6 @@ python visualize.py LAX JFK
 python compare.py LAX JFK
 
 # Visualize algorithm search patterns
-# Visualize algorithm search patterns
 python simulate_search.py LAX JFK
 
 # Find alternative routes with layovers
@@ -178,8 +177,6 @@ A* uses geographic heuristics to explore toward the goal, making it much more ef
 - Dijkstra explored 274 airports
 - A* explored only 2 airports
 - A* was 137x more efficient!
-
-**Want to understand why?** See [WHY_ASTAR_IS_FASTER.md](WHY_ASTAR_IS_FASTER.md) for a detailed explanation with visualizations and code comparisons.
 
 ## Advanced Usage
 
