@@ -297,11 +297,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contributors
 
 - Prentice Tang ([@prentang](https://github.com/prentang))
+- Kenneth Chen ([@KennethC12](https://https://github.com/KennethC12)
 
 ---
-
-## Acknowledgments
-
-- OpenFlights for comprehensive airport and route data
-- OpenSky Network for real-time flight tracking API
-- Plotly for interactive visualization capabilities
