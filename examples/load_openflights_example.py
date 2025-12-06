@@ -70,7 +70,7 @@ def main():
         for dest, distance in sorted(lax_routes, key=lambda x: x[1])[:5]:
             dest_airport = network.get_airport(dest)
             if dest_airport:
-                print(f"    → {dest} ({dest_airport.city}): {distance:.0f} km")
+                print(f"    -> {dest} ({dest_airport.city}): {distance:.0f} km")
     
     print("\n" + "=" * 60)
     print("Data loading complete! Network ready for pathfinding.")
