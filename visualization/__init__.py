@@ -11,7 +11,3 @@ __all__ = [
     'plot_multiple_paths', 
     'plot_network_graph'
 ]
-
-# TODO: Add interactive dashboard utilities
-# TODO: Add map styling and theming options
-# TODO: Add export utilities for different formats

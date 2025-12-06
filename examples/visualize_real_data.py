@@ -46,7 +46,7 @@ def load_real_network():
 def demo_cross_country_path(network: FlightNetwork):
     """Demonstrate cross-country pathfinding (LAX to JFK)."""
     print("=" * 60)
-    print("Demo 1: Cross-Country Flight (LAX → JFK)")
+    print("Demo 1: Cross-Country Flight (LAX -> JFK)")
     print("=" * 60)
     
     start = 'LAX'
@@ -64,7 +64,7 @@ def demo_cross_country_path(network: FlightNetwork):
     stats = pathfinder.get_algorithm_stats()
     
     if path:
-        print(f"\nPath found: {' → '.join(path)}")
+        print(f"\nPath found: {' -> '.join(path)}")
         print(f"Total distance: {total_distance:.0f} km")
         print(f"Number of stops: {len(path) - 1}")
         print(f"Algorithm stats: {stats['nodes_expanded']} nodes expanded, "
@@ -75,7 +75,7 @@ def demo_cross_country_path(network: FlightNetwork):
         plot_flight_path(
             network, 
             path, 
-            title=f"Cross-Country Flight: {start} → {goal}"
+            title=f"Cross-Country Flight: {start} -> {goal}"
         )
         print("Visualization opened in browser")
     else:
@@ -85,7 +85,7 @@ def demo_cross_country_path(network: FlightNetwork):
 def demo_algorithm_comparison(network: FlightNetwork):
     """Compare Dijkstra vs A* on the same route."""
     print("\n" + "=" * 60)
-    print("Demo 2: Algorithm Comparison (LAX → MIA)")
+    print("Demo 2: Algorithm Comparison (LAX -> MIA)")
     print("=" * 60)
     
     start = 'LAX'
@@ -96,7 +96,7 @@ def demo_algorithm_comparison(network: FlightNetwork):
         print(f"Error: {start} or {goal} not found in network")
         return
     
-    print(f"\nComparing algorithms for route {start} → {goal}...\n")
+    print(f"\nComparing algorithms for route {start} -> {goal}...\n")
     
     # Run Dijkstra
     print("Running Dijkstra's algorithm...")
@@ -105,7 +105,7 @@ def demo_algorithm_comparison(network: FlightNetwork):
     dijkstra_stats = dijkstra_finder.get_algorithm_stats()
     
     if dijkstra_path:
-        print(f"  Path: {' → '.join(dijkstra_path)}")
+        print(f"  Path: {' -> '.join(dijkstra_path)}")
         print(f"  Distance: {dijkstra_distance:.0f} km")
         print(f"  Nodes expanded: {dijkstra_stats['nodes_expanded']}")
         print(f"  Time: {dijkstra_stats['execution_time']:.4f}s")
@@ -117,7 +117,7 @@ def demo_algorithm_comparison(network: FlightNetwork):
     astar_stats = astar_finder.get_algorithm_stats()
     
     if astar_path:
-        print(f"  Path: {' → '.join(astar_path)}")
+        print(f"  Path: {' -> '.join(astar_path)}")
         print(f"  Distance: {astar_distance:.0f} km")
         print(f"  Nodes expanded: {astar_stats['nodes_expanded']}")
         print(f"  Time: {astar_stats['execution_time']:.4f}s")
@@ -157,13 +157,13 @@ def demo_regional_network(network: FlightNetwork):
     # Create a path to highlight (LAX to SFO)
     start, goal = 'LAX', 'SFO'
     if start in ca_airports and goal in ca_airports:
-        print(f"\nFinding path {start} → {goal}...")
+        print(f"\nFinding path {start} -> {goal}...")
         pathfinder = DijkstraPathFinder(network)
         path, distance = pathfinder.find_shortest_path(start, goal)
         stats = pathfinder.get_algorithm_stats()
         
         if path:
-            print(f"Path: {' → '.join(path)}")
+            print(f"Path: {' -> '.join(path)}")
             print(f"Distance: {distance:.0f} km")
             
             # Visualize network with highlighted path
@@ -180,7 +180,7 @@ def demo_regional_network(network: FlightNetwork):
 def demo_long_distance_path(network: FlightNetwork):
     """Demonstrate a long-distance path across the country."""
     print("\n" + "=" * 60)
-    print("Demo 4: Long-Distance Flight (SEA → MIA)")
+    print("Demo 4: Long-Distance Flight (SEA -> MIA)")
     print("=" * 60)
     
     start = 'SEA'
@@ -197,7 +197,7 @@ def demo_long_distance_path(network: FlightNetwork):
     stats = pathfinder.get_algorithm_stats()
     
     if path:
-        print(f"\nPath found: {' → '.join(path)}")
+        print(f"\nPath found: {' -> '.join(path)}")
         print(f"Total distance: {total_distance:.0f} km")
         print(f"Number of stops: {len(path) - 1}")
         print(f"Algorithm stats: {stats['nodes_expanded']} nodes expanded, "
@@ -208,7 +208,7 @@ def demo_long_distance_path(network: FlightNetwork):
         plot_flight_path(
             network, 
             path, 
-            title=f"Long-Distance Flight: {start} → {goal}"
+            title=f"Long-Distance Flight: {start} -> {goal}"
         )
         print("Visualization opened in browser")
     else:

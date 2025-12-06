@@ -5,18 +5,20 @@
 ```
 flight-pathfinder/
 ├── README.md                    # Project documentation
+├── QUICKSTART.md                # Quick start guide with examples
 ├── LICENSE                      # MIT License
 ├── PROJECT_STRUCTURE.md         # This file
 ├── requirements.txt             # Python dependencies
 ├── .gitignore                   # Git ignore patterns
-├── opensky_us_flights.py       # Legacy OpenSky script
-├── flight_pathfinder.py        # Main application entry point
+│
+├── find_path.py                 # Find fastest path CLI
+├── visualize.py                 # Visualize any route
+├── compare.py                   # Compare algorithms
 │
 ├── algorithms/                  # Pathfinding algorithms
 │   ├── __init__.py             
 │   ├── dijkstra.py             # Dijkstra's algorithm implementation
-│   ├── a_star.py               # A* algorithm implementation
-│   └── benchmark.py            # Algorithm comparison utilities
+│   └── a_star.py               # A* algorithm implementation
 │
 ├── benchmarks/                  # Performance benchmarking
 │   ├── run_benchmark.py        # Benchmark runner script
@@ -66,7 +68,28 @@ flight-pathfinder/
     └── path_plotter.py         # Flight path visualization (Plotly)
 ```
 
+## Quick Usage
+
+### Simple Scripts (Recommended)
+
+```bash
+# Find fastest path
+python find_path.py LAX JFK
+
+# Find path + visualize
+python find_path.py LAX JFK --visualize
+
+# List airports
+python find_path.py --list-airports
+
+# Visualize any route
+python visualize.py LAX JFK
+
+# Compare algorithms
+python compare.py LAX JFK
 ```
+
+See [QUICKSTART.md](QUICKSTART.md) for detailed examples.
 
 ## Implementation Status
 

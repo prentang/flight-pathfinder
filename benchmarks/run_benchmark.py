@@ -64,7 +64,7 @@ def run_benchmark(network: FlightNetwork):
         
         # Check if airports exist
         if not network.get_airport(start) or not network.get_airport(goal):
-            print(f"  ⚠ Skipping: Airport not found in network")
+            print(f"  Warning: Skipping: Airport not found in network")
             continue
         
         # Run Dijkstra
@@ -75,15 +75,15 @@ def run_benchmark(network: FlightNetwork):
             dijkstra_stats = dijkstra_finder.get_algorithm_stats()
             
             if dijkstra_path:
-                print(f"    ✓ Path found: {len(dijkstra_path)} stops, {dijkstra_distance:.0f} km")
-                print(f"    • Nodes expanded: {dijkstra_stats['nodes_expanded']}")
-                print(f"    • Execution time: {dijkstra_stats['execution_time']:.6f}s")
-                print(f"    • Peak memory: {format_memory(dijkstra_stats['peak_memory_bytes'])}")
+                print(f"    Path found: {len(dijkstra_path)} stops, {dijkstra_distance:.0f} km")
+                print(f"    Nodes expanded: {dijkstra_stats['nodes_expanded']}")
+                print(f"    Execution time: {dijkstra_stats['execution_time']:.6f}s")
+                print(f"    Peak memory: {format_memory(dijkstra_stats['peak_memory_bytes'])}")
             else:
-                print(f"    ✗ No path found")
+                print(f"    No path found")
                 dijkstra_stats = None
         except Exception as e:
-            print(f"    ✗ Error: {e}")
+            print(f"    Error: {e}")
             dijkstra_stats = None
         
         # Run A*
@@ -94,15 +94,15 @@ def run_benchmark(network: FlightNetwork):
             astar_stats = astar_finder.get_algorithm_stats()
             
             if astar_path:
-                print(f"    ✓ Path found: {len(astar_path)} stops, {astar_distance:.0f} km")
-                print(f"    • Nodes expanded: {astar_stats['nodes_expanded']}")
-                print(f"    • Execution time: {astar_stats['execution_time']:.6f}s")
-                print(f"    • Peak memory: {format_memory(astar_stats['peak_memory_bytes'])}")
+                print(f"    Path found: {len(astar_path)} stops, {astar_distance:.0f} km")
+                print(f"    Nodes expanded: {astar_stats['nodes_expanded']}")
+                print(f"    Execution time: {astar_stats['execution_time']:.6f}s")
+                print(f"    Peak memory: {format_memory(astar_stats['peak_memory_bytes'])}")
             else:
-                print(f"    ✗ No path found")
+                print(f"    No path found")
                 astar_stats = None
         except Exception as e:
-            print(f"    ✗ Error: {e}")
+            print(f"    Error: {e}")
             astar_stats = None
         
         # Compare results
@@ -112,9 +112,9 @@ def run_benchmark(network: FlightNetwork):
             memory_ratio = dijkstra_stats['peak_memory_bytes'] / astar_stats['peak_memory_bytes']
             
             print(f"\n  Comparison:")
-            print(f"    • A* expanded {speedup:.2f}x fewer nodes")
-            print(f"    • A* was {time_ratio:.2f}x faster")
-            print(f"    • A* used {memory_ratio:.2f}x memory")
+            print(f"    A* expanded {speedup:.2f}x fewer nodes")
+            print(f"    A* was {time_ratio:.2f}x faster")
+            print(f"    A* used {memory_ratio:.2f}x memory")
             
             # Store results
             results.append({
@@ -174,7 +174,7 @@ def export_results_txt(results, output_path):
             f.write(f"  Memory ratio: {result['memory_ratio']:.2f}x\n")
             f.write("\n" + "=" * 80 + "\n\n")
     
-    print(f"\n✓ Exported text results to: {output_path}")
+    print(f"\nExported text results to: {output_path}")
 
 
 def export_results_json(results, output_path):
@@ -188,13 +188,13 @@ def export_results_json(results, output_path):
     with open(output_path, 'w') as f:
         json.dump(output_data, f, indent=2)
     
-    print(f"✓ Exported JSON results to: {output_path}")
+    print(f"Exported JSON results to: {output_path}")
 
 
 def export_results_csv(results, output_path):
     """Export results to CSV format."""
     if not results:
-        print("⚠ No results to export to CSV")
+        print("Warning: No results to export to CSV")
         return
     
     fieldnames = results[0].keys()
@@ -204,7 +204,7 @@ def export_results_csv(results, output_path):
         writer.writeheader()
         writer.writerows(results)
     
-    print(f"✓ Exported CSV results to: {output_path}")
+    print(f"Exported CSV results to: {output_path}")
 
 
 def main():
@@ -218,7 +218,7 @@ def main():
     us_airports_df, us_routes_df = setup_openflights_data()
     network = FlightNetwork()
     network.load_from_dataframes(us_airports_df, us_routes_df)
-    print(f"✓ Network loaded: {len(network.airports)} airports, "
+    print(f"Network loaded: {len(network.airports)} airports, "
           f"{sum(len(routes) for routes in network.adjacency_list.values())} routes")
     
     # Run benchmarks
@@ -247,9 +247,9 @@ def main():
         avg_memory_ratio = sum(r['memory_ratio'] for r in results) / len(results)
         
         print(f"\nAverage Performance:")
-        print(f"  • A* expanded {avg_speedup:.2f}x fewer nodes on average")
-        print(f"  • A* was {avg_time_ratio:.2f}x faster on average")
-        print(f"  • A* used {avg_memory_ratio:.2f}x memory on average")
+        print(f"  A* expanded {avg_speedup:.2f}x fewer nodes on average")
+        print(f"  A* was {avg_time_ratio:.2f}x faster on average")
+        print(f"  A* used {avg_memory_ratio:.2f}x memory on average")
     
     print("=" * 80)
 

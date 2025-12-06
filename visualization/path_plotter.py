@@ -341,7 +341,7 @@ def plot_network_graph(network: FlightNetwork, highlight_path: List[str] = None)
     
     title = "Flight Network Graph"
     if highlight_path:
-        title += f" (Highlighting: {' → '.join(highlight_path)})"
+        title += f" (Highlighting: {' -> '.join(highlight_path)})"
     
     fig.update_layout(
         title=title,
@@ -351,72 +351,3 @@ def plot_network_graph(network: FlightNetwork, highlight_path: List[str] = None)
     )
     
     fig.show()
-
-
-def plot_algorithm_comparison(benchmark_results: Dict) -> None:
-    """
-    Create visualizations comparing algorithm performance.
-    
-    Args:
-        benchmark_results: Results from algorithm benchmarking
-    """
-    # TODO: Create bar charts comparing execution times
-    # TODO: Plot nodes visited comparison
-    # TODO: Show memory usage differences
-    # TODO: Create scatter plots for path length vs time
-    # TODO: Generate performance distribution histograms
-    pass
-
-
-def plot_search_space(network: FlightNetwork, source: str, destination: str,
-                     visited_nodes: List[str], algorithm: str = "Dijkstra") -> None:
-    """
-    Visualize the search space explored by pathfinding algorithms.
-    
-    Args:
-        network: FlightNetwork being searched
-        source: Source airport
-        destination: Destination airport  
-        visited_nodes: List of airports visited during search
-        algorithm: Algorithm name for title
-    """
-    # TODO: Plot all airports in network
-    # TODO: Highlight visited nodes in different color
-    # TODO: Show source and destination prominently
-    # TODO: Add exploration order if available
-    # TODO: Compare search spaces between algorithms
-    pass
-
-
-def create_interactive_path_planner(network: FlightNetwork) -> None:
-    """
-    Create interactive web interface for path planning.
-    
-    Args:
-        network: FlightNetwork for path planning
-    """
-    # TODO: Create Plotly Dash web application
-    # TODO: Add dropdown menus for source/destination selection
-    # TODO: Add algorithm selection (Dijkstra vs A*)
-    # TODO: Add weight type selection (distance, time, cost)
-    # TODO: Display results with interactive map
-    # TODO: Show path statistics and comparison
-    pass
-
-
-def export_path_visualization(network: FlightNetwork, path: List[str], 
-                            filename: str, format: str = "html") -> None:
-    """
-    Export path visualization to file.
-    
-    Args:
-        network: FlightNetwork containing airport data
-        path: Flight path to visualize
-        filename: Output filename
-        format: Export format ("html", "png", "pdf")
-    """
-    # TODO: Generate path visualization
-    # TODO: Export in specified format
-    # TODO: Handle different export formats appropriately
-    # TODO: Include metadata and statistics
-    pass

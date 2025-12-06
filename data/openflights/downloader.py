@@ -387,9 +387,9 @@ def setup_openflights_data() -> tuple[pd.DataFrame, pd.DataFrame]:
         validation_report = validate_openflights_data()
         
         if validation_report["status"] == "OK":
-            print("✓ Data validation passed")
+            print("Data validation passed")
         else:
-            print("✗ Data validation found errors:")
+            print("Data validation found errors:")
             for error in validation_report["errors"]:
                 print(f"  - {error}")
         
@@ -411,7 +411,7 @@ def setup_openflights_data() -> tuple[pd.DataFrame, pd.DataFrame]:
         print("=" * 60)
         
     except Exception as e:
-        print(f"⚠ Validation failed: {e}")
+        print(f"Warning: Validation failed: {e}")
         print("Proceeding with data anyway...")
     
     # Return tuple of US airports and routes DataFrames
@@ -487,7 +487,7 @@ if __name__ == "__main__":
         if args.download_only:
             print("Downloading OpenFlights data...")
             download_openflights_data(force_refresh=args.force_refresh)
-            print("✓ Download complete")
+            print("Download complete")
             
         elif args.validate:
             print("Validating OpenFlights data...")
@@ -502,12 +502,12 @@ if __name__ == "__main__":
             if report['errors']:
                 print("\nErrors:")
                 for error in report['errors']:
-                    print(f"  ✗ {error}")
+                    print(f"  - {error}")
             
             if report['warnings']:
                 print("\nWarnings:")
                 for warning in report['warnings']:
-                    print(f"  ⚠ {warning}")
+                    print(f"  - {warning}")
             
             print("\n" + "=" * 60)
             print("Statistics")
@@ -552,14 +552,14 @@ if __name__ == "__main__":
                 print(us_routes[["Source airport", "Destination airport", "Airline"]].head())
                 print("=" * 60)
             
-            print("\n✓ Setup complete! Data is ready to use.")
+            print("\nSetup complete! Data is ready to use.")
     
     except FileNotFoundError as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\nError: {e}")
         print("Run with --download-only first to download the data files.")
         exit(1)
     except Exception as e:
-        print(f"\n✗ Unexpected error: {e}")
+        print(f"\nUnexpected error: {e}")
         import traceback
         traceback.print_exc()
         exit(1)
