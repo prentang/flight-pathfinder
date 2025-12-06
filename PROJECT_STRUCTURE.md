@@ -14,6 +14,8 @@ flight-pathfinder/
 ├── find_path.py                 # Find fastest path CLI
 ├── visualize.py                 # Visualize any route
 ├── compare.py                   # Compare algorithms
+├── simulate_search.py           # Visualize algorithm search patterns
+├── find_alternatives.py         # Find alternative routes with layovers
 │
 ├── algorithms/                  # Pathfinding algorithms
 │   ├── __init__.py             
@@ -87,6 +89,13 @@ python visualize.py LAX JFK
 
 # Compare algorithms
 python compare.py LAX JFK
+
+# Simulate search patterns
+python simulate_search.py LAX JFK
+
+# Find alternative routes
+python find_alternatives.py ABE JFK
+python find_alternatives.py LAX JFK --visualize --compare
 ```
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed examples.

@@ -89,6 +89,8 @@ class SimpleFlightPathFinder:
         src_airport = self.network.get_airport(source)
         dest_airport = self.network.get_airport(destination)
         
+        num_layovers = len(path) - 2  # path includes source and destination
+        
         print(f"\n{'='*70}")
         print(f"FASTEST PATH FOUND")
         print(f"{'='*70}")
@@ -96,22 +98,44 @@ class SimpleFlightPathFinder:
         print(f"To:   {destination} - {dest_airport.name} ({dest_airport.city})")
         print(f"\nRoute: {' -> '.join(path)}")
         print(f"Total Distance: {distance:.0f} km")
-        print(f"Number of Stops: {len(path) - 1}")
+        
+        if num_layovers == 0:
+            print(f"Flight Type: DIRECT FLIGHT (no layovers)")
+        elif num_layovers == 1:
+            print(f"Flight Type: 1 LAYOVER at {path[1]}")
+        else:
+            layover_airports = ', '.join(path[1:-1])
+            print(f"Flight Type: {num_layovers} LAYOVERS at {layover_airports}")
+        
         print(f"\nAlgorithm: {algo_name}")
         print(f"Nodes Explored: {stats['nodes_expanded']}")
         print(f"Execution Time: {stats['execution_time']*1000:.2f} ms")
         print(f"Memory Used: {stats['peak_memory_bytes']/1024:.2f} KB")
         print(f"{'='*70}\n")
         
-        # Show route details
+        # Show route details with layover information
         if len(path) > 1:
-            print("Route Details:")
+            print("Flight Segments:")
             for i in range(len(path) - 1):
                 leg_distance = self.network.get_edge_weight(path[i], path[i+1])
                 from_apt = self.network.get_airport(path[i])
                 to_apt = self.network.get_airport(path[i+1])
-                print(f"  {i+1}. {path[i]} ({from_apt.city}) -> {path[i+1]} "
-                      f"({to_apt.city}): {leg_distance:.0f} km")
+                
+                # Determine if this is a layover stop
+                if i == 0:
+                    segment_type = "Departure"
+                elif i == len(path) - 2:
+                    segment_type = "Final Leg"
+                else:
+                    segment_type = "Connecting"
+                
+                print(f"  Segment {i+1} ({segment_type}): {path[i]} ({from_apt.city}) -> {path[i+1]} "
+                      f"({to_apt.city}) - {leg_distance:.0f} km")
+                
+                # Show layover info for intermediate stops
+                if i < len(path) - 2:  # Not the last segment
+                    layover_airport = self.network.get_airport(path[i+1])
+                    print(f"    ** LAYOVER at {path[i+1]} - {layover_airport.name} **")
         
         # Visualize if requested
         if visualize:
