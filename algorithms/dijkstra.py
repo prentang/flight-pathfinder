@@ -4,8 +4,9 @@ Dijkstra's algorithm implementation for finding shortest paths in flight network
 from typing import Dict, List, Tuple, Optional, Set
 import heapq
 import math
-from models.graph import FlightNetwork, Airport, Route
 import time
+import tracemalloc
+from models.graph import FlightNetwork, Airport, Route
 
 class DijkstraPathFinder:
     """
@@ -35,12 +36,15 @@ class DijkstraPathFinder:
         """
 
         start_time = time.time()
+        tracemalloc.start()
         self.last_run_stats = {
             "nodes_expanded": 0,
             "nodes_generated": 0,
             "execution_time": 0,
             "path_cost": 0,
             "heuristic_calls": 0,
+            "peak_memory_bytes": 0,
+            "algorithm": "Dijkstra"
         }
 
         if source not in self.network.airports:
@@ -80,11 +84,17 @@ class DijkstraPathFinder:
 
         if destination not in previous_nodes and destination != source:
             self.last_run_stats["execution_time"] = time.time() - start_time
+            current, peak = tracemalloc.get_traced_memory()
+            self.last_run_stats["peak_memory_bytes"] = peak
+            tracemalloc.stop()
             return ([], float('inf'))
 
         path = self._reconstruct_path(previous_nodes, destination)
         total_distance = distances[destination]
         self.last_run_stats["execution_time"] = time.time() - start_time
+        current, peak = tracemalloc.get_traced_memory()
+        self.last_run_stats["peak_memory_bytes"] = peak
+        tracemalloc.stop()
         self.last_run_stats["path_cost"] = total_distance
         return (path, total_distance)
     
