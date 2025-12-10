@@ -79,6 +79,8 @@ class AStarPathFinder:
                 path = self._reconstruct_path(came_from, current)
                 self.last_run_stats["path_cost"] = g_score[current]
                 self.last_run_stats["execution_time"] = time.time() - start_time
+                self.last_run_stats["explored_nodes"] = closed_set.copy()
+                self.last_run_stats["came_from"] = came_from.copy()
                 current_mem, peak_mem = tracemalloc.get_traced_memory()
                 self.last_run_stats["peak_memory_bytes"] = peak_mem
                 tracemalloc.stop()

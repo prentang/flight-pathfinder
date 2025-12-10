@@ -178,6 +178,101 @@ class TestAStarPathFinder(unittest.TestCase):
         self.assertEqual(comparison["destination"], "JFK")
         
         self.assertTrue(comparison["comparison"]["paths_are_optimal"])
+    
+    def test_explored_nodes_field_populated(self):
+        """Test that explored_nodes field is correctly populated in last_run_stats."""
+        path, _ = self.pathfinder.find_shortest_path("LAX", "JFK")
+        stats = self.pathfinder.last_run_stats
+        
+        # Check explored_nodes exists and is a set
+        self.assertIn("explored_nodes", stats)
+        self.assertIsInstance(stats["explored_nodes"], set)
+        
+        # Check it's not empty for valid path
+        self.assertGreater(len(stats["explored_nodes"]), 0)
+        
+        # Check that source and destination are in explored nodes
+        self.assertIn("LAX", stats["explored_nodes"])
+        
+        # Check nodes_expanded matches explored_nodes length
+        self.assertEqual(stats["nodes_expanded"], len(stats["explored_nodes"]))
+    
+    def test_came_from_field_populated(self):
+        """Test that came_from field is correctly populated in last_run_stats."""
+        path, _ = self.pathfinder.find_shortest_path("LAX", "JFK")
+        stats = self.pathfinder.last_run_stats
+        
+        # Check came_from exists and is a dict
+        self.assertIn("came_from", stats)
+        self.assertIsInstance(stats["came_from"], dict)
+        
+        # Check it's not empty for multi-hop path
+        self.assertGreater(len(stats["came_from"]), 0)
+        
+        # Check that destination has a parent (unless direct route)
+        if len(path) > 2:  # Multi-hop path
+            self.assertIn("JFK", stats["came_from"])
+        
+        # Verify parent-child relationships are valid
+        for child, parent in stats["came_from"].items():
+            self.assertIn(child, self.network.airports)
+            self.assertIn(parent, self.network.airports)
+    
+    def test_explored_nodes_same_source_destination(self):
+        """Test explored_nodes when source equals destination."""
+        path, _ = self.pathfinder.find_shortest_path("LAX", "LAX")
+        stats = self.pathfinder.last_run_stats
+        
+        # Should return immediately without exploration
+        self.assertEqual(path, ["LAX"])
+        
+        # Stats might not be populated for trivial case
+        # This is implementation-dependent, just verify it doesn't crash
+        self.assertIsInstance(stats, dict)
+    
+    def test_explored_nodes_no_path_exists(self):
+        """Test explored_nodes when no path exists between airports."""
+        # Create isolated airport with no connections
+        isolated = Airport(
+            code="ISO",
+            name="Isolated Airport",
+            city="Nowhere",
+            country="United States",
+            latitude=0.0,
+            longitude=0.0
+        )
+        self.network.add_airport(isolated)
+        
+        path, cost = self.pathfinder.find_shortest_path("LAX", "ISO")
+        stats = self.pathfinder.last_run_stats
+        
+        # Should return empty path and infinite cost
+        self.assertEqual(path, [])
+        self.assertEqual(cost, float('inf'))
+        
+        # explored_nodes should still be tracked
+        if "explored_nodes" in stats:
+            self.assertIsInstance(stats["explored_nodes"], set)
+            # Should have explored some nodes trying to find path
+            self.assertGreater(len(stats["explored_nodes"]), 0)
+    
+    def test_came_from_reflects_actual_path(self):
+        """Test that came_from can reconstruct the found path."""
+        path, _ = self.pathfinder.find_shortest_path("LAX", "JFK")
+        stats = self.pathfinder.last_run_stats
+        
+        if len(path) > 1:
+            came_from = stats["came_from"]
+            
+            # Reconstruct path from came_from
+            reconstructed = []
+            current = "JFK"
+            while current is not None:
+                reconstructed.insert(0, current)
+                current = came_from.get(current)
+            
+            # Reconstructed path should match found path
+            self.assertEqual(reconstructed, path)
 
 
 if __name__ == "__main__":

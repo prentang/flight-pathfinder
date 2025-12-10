@@ -92,6 +92,8 @@ class DijkstraPathFinder:
         path = self._reconstruct_path(previous_nodes, destination)
         total_distance = distances[destination]
         self.last_run_stats["execution_time"] = time.time() - start_time
+        self.last_run_stats["explored_nodes"] = visited.copy()
+        self.last_run_stats["came_from"] = previous_nodes.copy()
         current, peak = tracemalloc.get_traced_memory()
         self.last_run_stats["peak_memory_bytes"] = peak
         tracemalloc.stop()

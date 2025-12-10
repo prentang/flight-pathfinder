@@ -13,30 +13,30 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Find fastest path
-python find_path.py LAX JFK
+python cli/find_path.py LAX JFK
 
 # Visualize route on map
-python visualize.py LAX JFK
+python cli/visualize.py LAX JFK
 
 # Compare algorithms
-python compare.py LAX JFK
+python cli/compare.py LAX JFK
 
 # Visualize algorithm search patterns
-python simulate_search.py LAX JFK
+python cli/simulate_search.py LAX JFK
 
 # Find alternative routes with layovers
-python find_alternatives.py ABE JFK
-python find_alternatives.py LAX JFK --visualize --compare
+python cli/find_alternatives.py ABE JFK
+python cli/find_alternatives.py LAX JFK --visualize --compare
 ```
 
 ## Usage
 
 ### Find Path
 ```bash
-python find_path.py LAX JFK                    # Find fastest route
-python find_path.py LAX JFK --visualize        # + show map
-python find_path.py --list-airports            # List all airports
-python find_path.py --airport-info LAX         # Airport details
+python cli/find_path.py LAX JFK                    # Find fastest route
+python cli/find_path.py LAX JFK --visualize        # + show map
+python cli/find_path.py --list-airports            # List all airports
+python cli/find_path.py --airport-info LAX         # Airport details
 ```
 
 Shows layover information clearly:
@@ -46,10 +46,10 @@ Shows layover information clearly:
 
 ### Find Alternatives
 ```bash
-python find_alternatives.py ABE JFK            # Multiple route options
-python find_alternatives.py LAX JFK --visualize # + show map
-python find_alternatives.py LAX JFK --compare  # + algorithm stats
-python find_alternatives.py LAX JFK -v -c     # Both options
+python cli/find_alternatives.py ABE JFK            # Multiple route options
+python cli/find_alternatives.py LAX JFK --visualize # + show map
+python cli/find_alternatives.py LAX JFK --compare  # + algorithm stats
+python cli/find_alternatives.py LAX JFK -v -c     # Both options
 ```
 
 Finds alternative routes with different layover patterns. Great for:
@@ -61,19 +61,19 @@ Finds alternative routes with different layover patterns. Great for:
 
 ### Visualize
 ```bash
-python visualize.py LAX JFK                    # Quick visualization
+python cli/visualize.py LAX JFK                    # Quick visualization
 ```
 
 Interactive map opens automatically in your default browser.
 
 ### Compare
 ```bash
-python compare.py LAX JFK                      # Dijkstra vs A*
+python cli/compare.py LAX JFK                      # Dijkstra vs A*
 ```
 
 ### Simulate Search
 ```bash
-python simulate_search.py LAX JFK              # See how algorithms explore
+python cli/simulate_search.py LAX JFK              # See how algorithms explore
 ```
 
 Shows side-by-side visualization of which airports each algorithm explores before finding the path.
@@ -222,11 +222,12 @@ python -m unittest discover tests -v           # Run all 48 tests
 
 ```
 flight-pathfinder/
-├── find_path.py         # Main CLI tool
-├── visualize.py         # Quick visualization
-├── compare.py           # Algorithm comparison
-├── simulate_search.py   # Algorithm search visualization
-├── find_alternatives.py # Find alternative routes with layovers
+├── cli/                 # Command-line interface tools
+│   ├── find_path.py         # Main pathfinding CLI
+│   ├── visualize.py         # Quick visualization
+│   ├── compare.py           # Algorithm comparison
+│   ├── simulate_search.py   # Search visualization
+│   └── find_alternatives.py # Alternative routes
 ├── algorithms/          # Dijkstra & A* implementations
 ├── data/                # Data loaders & OpenFlights integration
 ├── models/              # Graph data structures
