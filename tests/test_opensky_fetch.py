@@ -11,14 +11,14 @@ except ImportError:
     PANDAS_AVAILABLE = False
 
 if PANDAS_AVAILABLE:
-    from src.opensky_fetch import fetch_flights_from_opensky
+    from data.opensky_fetch import fetch_flights_from_opensky
 
 
 @unittest.skipIf(not PANDAS_AVAILABLE, "pandas not available")
 class TestOpenSkyFetch(unittest.TestCase):
     """Test cases for OpenSky API fetcher."""
     
-    @patch('src.opensky_fetch.requests.get')
+    @patch('data.opensky_fetch.requests.get')
     def test_fetch_returns_dataframe(self, mock_get):
         """Test that fetch returns a pandas DataFrame."""
         mock_response = Mock()
@@ -36,7 +36,7 @@ class TestOpenSkyFetch(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertTrue(hasattr(df, 'head'))
     
-    @patch('src.opensky_fetch.requests.get')
+    @patch('data.opensky_fetch.requests.get')
     def test_dataframe_columns(self, mock_get):
         """Test that DataFrame has expected columns."""
         mock_response = Mock()
@@ -53,7 +53,7 @@ class TestOpenSkyFetch(unittest.TestCase):
         expected = {"callsign", "origin_country", "latitude", "longitude", "velocity", "baro_altitude"}
         self.assertTrue(set(df.columns).issuperset(expected))
     
-    @patch('src.opensky_fetch.requests.get')
+    @patch('data.opensky_fetch.requests.get')
     def test_filters_by_us_bounds(self, mock_get):
         """Test that only US flights are included."""
         mock_response = Mock()
@@ -71,7 +71,7 @@ class TestOpenSkyFetch(unittest.TestCase):
         
         self.assertEqual(len(df), 2)
     
-    @patch('src.opensky_fetch.requests.get')
+    @patch('data.opensky_fetch.requests.get')
     def test_handles_api_error(self, mock_get):
         """Test that API errors are handled gracefully."""
         mock_get.side_effect = Exception("API Error")
@@ -81,7 +81,7 @@ class TestOpenSkyFetch(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertTrue(df.empty)
     
-    @patch('src.opensky_fetch.requests.get')
+    @patch('data.opensky_fetch.requests.get')
     def test_handles_missing_coordinates(self, mock_get):
         """Test that flights with missing coordinates are filtered out."""
         mock_response = Mock()
@@ -99,7 +99,7 @@ class TestOpenSkyFetch(unittest.TestCase):
         self.assertEqual(len(df), 1)
         self.assertEqual(df.iloc[0]['callsign'], "AAL456")
     
-    @patch('src.opensky_fetch.requests.get')
+    @patch('data.opensky_fetch.requests.get')
     def test_with_authentication(self, mock_get):
         """Test that authentication credentials are passed correctly."""
         mock_response = Mock()

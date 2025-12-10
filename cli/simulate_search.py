@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from data.openflights.downloader import setup_openflights_data
@@ -145,18 +145,32 @@ def create_comparison_visualization(network: FlightNetwork, source: str, destina
     """
     print(f"\nSimulating search from {source} to {destination}...\n")
     
-    # Run both algorithms
+    # Run Dijkstra and get explored nodes
     print("Running Dijkstra's algorithm...")
-    dijkstra_path, dijkstra_explored = simulate_dijkstra_exploration(network, source, destination)
+    dijkstra_finder = DijkstraPathFinder(network)
+    dijkstra_path, _ = dijkstra_finder.find_shortest_path(source, destination)
+    dijkstra_stats = dijkstra_finder.last_run_stats
+    dijkstra_nodes = dijkstra_stats['nodes_expanded']
+    dijkstra_explored = dijkstra_stats.get('explored_nodes', set())
+    dijkstra_came_from = dijkstra_stats.get('came_from', {})
+    
     print(f"  Path: {' -> '.join(dijkstra_path)}")
-    print(f"  Explored {len(dijkstra_explored)} airports")
+    print(f"  Explored {dijkstra_nodes} airports")
     
+    # Run A* and get explored nodes
     print("\nRunning A* algorithm...")
-    astar_path, astar_explored = simulate_astar_exploration(network, source, destination)
-    print(f"  Path: {' -> '.join(astar_path)}")
-    print(f"  Explored {len(astar_explored)} airports")
+    astar_finder = AStarPathFinder(network)
+    astar_path, _ = astar_finder.find_shortest_path(source, destination)
+    astar_stats = astar_finder.last_run_stats
+    astar_nodes = astar_stats['nodes_expanded']
+    astar_explored = astar_stats.get('explored_nodes', set())
+    astar_came_from = astar_stats.get('came_from', {})
     
-    print(f"\nEfficiency: A* explored {len(dijkstra_explored) / len(astar_explored):.1f}x fewer nodes\n")
+    print(f"  Path: {' -> '.join(astar_path)}")
+    print(f"  Explored {astar_nodes} airports")
+    print(f"  Actually explored: {sorted(astar_explored)}")
+    
+    print(f"\nEfficiency: A* explored {dijkstra_nodes / astar_nodes:.1f}x fewer nodes\n")
     
     # Create visualization
     from plotly.subplots import make_subplots
@@ -169,7 +183,7 @@ def create_comparison_visualization(network: FlightNetwork, source: str, destina
     )
     
     # Helper function to add exploration to subplot
-    def add_exploration_to_subplot(explored_set, path, row, col, color):
+    def add_exploration_to_subplot(explored_set, path, row, col, color, actual_count=None, algorithm_name='', came_from=None):
         # All airports (gray)
         all_lats = [network.get_airport(code).latitude for code in network.airports if network.get_airport(code)]
         all_lons = [network.get_airport(code).longitude for code in network.airports if network.get_airport(code)]
@@ -186,10 +200,39 @@ def create_comparison_visualization(network: FlightNetwork, source: str, destina
             row=row, col=col
         )
         
+        # Add exploration traces (showing how algorithm explored)
+        # Only draw traces for nodes that were actually explored (in explored_set)
+        if came_from and explored_set:
+            for node in explored_set:
+                if node in came_from:
+                    parent = came_from[node]
+                    node_airport = network.get_airport(node)
+                    parent_airport = network.get_airport(parent)
+                    
+                    if node_airport and parent_airport:
+                        fig.add_trace(
+                            go.Scattergeo(
+                                lon=[parent_airport.longitude, node_airport.longitude],
+                                lat=[parent_airport.latitude, node_airport.latitude],
+                                mode='lines',
+                                line=dict(width=1, color=color, dash='dot'),
+                                opacity=0.4,
+                                showlegend=False,
+                                hoverinfo='skip'
+                            ),
+                            row=row, col=col
+                        )
+        
         # Explored nodes (colored)
         explored_lats = [network.get_airport(code).latitude for code in explored_set if network.get_airport(code)]
         explored_lons = [network.get_airport(code).longitude for code in explored_set if network.get_airport(code)]
         explored_names = [f"{code}: {network.get_airport(code).name}" for code in explored_set if network.get_airport(code)]
+        
+        # Use actual count if provided, otherwise use the size of explored_set
+        legend_count = actual_count if actual_count is not None else len(explored_set)
+        
+        # Create unique legend label for each algorithm
+        legend_label = f'{algorithm_name} Explored ({legend_count})' if algorithm_name else f'Explored ({legend_count} nodes)'
         
         fig.add_trace(
             go.Scattergeo(
@@ -199,8 +242,9 @@ def create_comparison_visualization(network: FlightNetwork, source: str, destina
                 marker=dict(size=4, color=color, opacity=0.6),
                 text=explored_names,
                 hoverinfo='text',
-                name=f'Explored ({len(explored_set)} nodes)',
-                showlegend=(col == 1)
+                name=legend_label,
+                showlegend=True,  # Show legend for both
+                legendgroup=algorithm_name  # Group by algorithm
             ),
             row=row, col=col
         )
@@ -263,10 +307,10 @@ def create_comparison_visualization(network: FlightNetwork, source: str, destina
             )
     
     # Add Dijkstra exploration (left subplot)
-    add_exploration_to_subplot(dijkstra_explored, dijkstra_path, 1, 1, 'blue')
+    add_exploration_to_subplot(dijkstra_explored, dijkstra_path, 1, 1, 'blue', dijkstra_nodes, 'Dijkstra', dijkstra_came_from)
     
-    # Add A* exploration (right subplot)
-    add_exploration_to_subplot(astar_explored, astar_path, 1, 2, 'purple')
+    # Add A* exploration (right subplot)  
+    add_exploration_to_subplot(astar_explored, astar_path, 1, 2, 'purple', astar_nodes, 'A*', astar_came_from)
     
     # Update layout
     fig.update_geos(
@@ -281,9 +325,9 @@ def create_comparison_visualization(network: FlightNetwork, source: str, destina
     
     fig.update_layout(
         title=f"Algorithm Comparison: {source} to {destination}<br>" +
-              f"<sub>Dijkstra explored {len(dijkstra_explored)} nodes | " +
-              f"A* explored {len(astar_explored)} nodes | " +
-              f"A* is {len(dijkstra_explored) / len(astar_explored):.1f}x more efficient</sub>",
+              f"<sub>Dijkstra explored {dijkstra_nodes} nodes | " +
+              f"A* explored {astar_nodes} nodes | " +
+              f"A* is {dijkstra_nodes / astar_nodes:.1f}x more efficient</sub>",
         height=600,
         showlegend=True,
         legend=dict(x=1.02, y=0.5)
