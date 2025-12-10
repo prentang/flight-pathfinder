@@ -22,12 +22,7 @@ python cli/visualize.py LAX JFK
 python cli/compare.py LAX JFK
 
 # Visualize algorithm search patterns
-<<<<<<< Updated upstream
-# Visualize algorithm search patterns
-python simulate_search.py LAX JFK
-=======
 python cli/simulate_search.py LAX JFK
->>>>>>> Stashed changes
 
 # Find alternative routes with layovers
 python cli/find_alternatives.py ABE JFK
