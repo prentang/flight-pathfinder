@@ -178,8 +178,6 @@ A* uses geographic heuristics to explore toward the goal, making it much more ef
 - A* explored only 2 airports
 - A* was 137x more efficient!
 
-**Want to understand why?** See [WHY_ASTAR_IS_FASTER.md](WHY_ASTAR_IS_FASTER.md) for a detailed explanation with visualizations and code comparisons.
-
 ## Advanced Usage
 
 ### Benchmarks
